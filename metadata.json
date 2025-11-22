@@ -1,0 +1,7 @@
+{
+  "name": "Luxe Barbers & Co.",
+  "description": "A premium gentlemen's grooming destination featuring AI-powered style consultations, precision cuts, and traditional shaves.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
