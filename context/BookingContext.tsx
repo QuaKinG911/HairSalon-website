@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Service } from '../types';
 
 interface BookingContextType {
@@ -12,7 +12,14 @@ interface BookingContextType {
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
 
 export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cart, setCart] = useState<Service[]>([]);
+  const [cart, setCart] = useState<Service[]>(() => {
+    const savedCart = localStorage.getItem('bookingCart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('bookingCart', JSON.stringify(cart));
+  }, [cart]);
 
   const addToCart = (service: Service) => {
     // Prevent duplicates for simplicity in this demo, or allow them if quantity is needed

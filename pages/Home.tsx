@@ -9,7 +9,7 @@ const Home: React.FC = () => {
       <section className="relative h-[85vh] flex items-center justify-center overflow-hidden bg-gray-900">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1503951914875-452162b7f30a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+            src="/images/services/TheGentlemanPackage.jpg"
             alt="Barber Shop Interior"
             className="w-full h-full object-cover filter brightness-[0.4] saturate-0"
           />
@@ -44,33 +44,33 @@ const Home: React.FC = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="py-24 px-4 bg-white relative z-20 -mt-12">
+      <section className="py-24 px-4 bg-gray-800 relative z-20 -mt-12">
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 p-10 rounded-sm border-b-4 border-amber-600 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-gray-700 p-10 rounded-sm border-b-4 border-amber-600 shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 bg-gray-900 text-amber-500 rounded-lg flex items-center justify-center mb-6">
                 <Sparkles size={28} />
               </div>
-              <h3 className="text-xl font-bold font-serif text-gray-900 mb-3">AI Face Analysis</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="text-xl font-bold font-serif text-white mb-3">AI Face Analysis</h3>
+              <p className="text-gray-400 leading-relaxed">
                 Upload your photo to let our smart algorithms suggest the perfect cut for your specific face shape and hair type before the scissors touch.
               </p>
             </div>
-            <div className="bg-gray-50 p-10 rounded-sm border-b-4 border-amber-600 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-gray-700 p-10 rounded-sm border-b-4 border-amber-600 shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 bg-gray-900 text-amber-500 rounded-lg flex items-center justify-center mb-6">
                 <Scissors size={28} />
               </div>
-              <h3 className="text-xl font-bold font-serif text-gray-900 mb-3">Master Barbers</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="text-xl font-bold font-serif text-white mb-3">Master Barbers</h3>
+              <p className="text-gray-400 leading-relaxed">
                 Our team consists of industry veterans who have mastered the art of both classic cuts and modern fades.
               </p>
             </div>
-            <div className="bg-gray-50 p-10 rounded-sm border-b-4 border-amber-600 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-gray-700 p-10 rounded-sm border-b-4 border-amber-600 shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 bg-gray-900 text-amber-500 rounded-lg flex items-center justify-center mb-6">
                 <Star size={28} />
               </div>
-              <h3 className="text-xl font-bold font-serif text-gray-900 mb-3">VIP Experience</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <h3 className="text-xl font-bold font-serif text-white mb-3">VIP Experience</h3>
+              <p className="text-gray-400 leading-relaxed">
                 Enjoy a complimentary whiskey or espresso, hot towel service, and a relaxing atmosphere designed for the modern man.
               </p>
             </div>
@@ -85,16 +85,16 @@ const Home: React.FC = () => {
             <div className="md:w-1/2 relative">
               <div className="absolute -inset-4 border-2 border-amber-600/30 rounded-sm transform translate-x-4 translate-y-4"></div>
               <img
-                src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                alt="Barber cutting hair"
+                src="/images/services/TheExecutiveCut.jpg"
+                alt="The Executive Cut"
                 className="relative rounded-sm shadow-2xl w-full h-[500px] object-cover grayscale hover:grayscale-0 transition-all duration-700"
               />
             </div>
             <div className="md:w-1/2 space-y-8">
               <span className="text-amber-500 font-bold tracking-widest text-sm uppercase border-b border-amber-500 pb-2">Who We Are</span>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold leading-tight">The Gentlemen's <br/>Standard</h2>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold leading-tight text-white">The Gentlemen's <br/>Standard</h2>
               <p className="text-gray-400 text-lg leading-relaxed">
-                Luxe Barbers & Co. was founded on a simple principle: men deserve a better grooming experience. We've ditched the rush of the discount chains and the pretentiousness of high-end salons.
+                Luxe Barber was founded on a simple principle: men deserve a better grooming experience. We've ditched the rush of the discount chains and the pretentiousness of high-end salons.
               </p>
               <p className="text-gray-400 text-lg leading-relaxed">
                 We offer a sanctuary where you can relax, get tailored advice, and leave looking sharper than ever. It's not just a haircut; it's a ritual.

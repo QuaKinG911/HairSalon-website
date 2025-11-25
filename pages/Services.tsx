@@ -16,11 +16,11 @@ const Services: React.FC = () => {
   const isInCart = (id: string) => cart.some(item => item.id === id);
 
   return (
-    <div className="bg-gray-50 min-h-screen py-16 px-4">
+    <div className="bg-gray-900 min-h-screen py-16 px-4">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-serif font-bold mb-6 text-gray-900">Grooming Menu</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+          <h1 className="text-5xl font-serif font-bold mb-6 text-white">Grooming Menu</h1>
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg">
             Select from our range of premium services designed to keep you looking your absolute best.
           </p>
         </div>
@@ -33,8 +33,8 @@ const Services: React.FC = () => {
               onClick={() => setFilter(cat)}
               className={`px-8 py-3 rounded-sm text-sm font-bold tracking-wider uppercase transition-all ${
                 filter === cat
-                  ? 'bg-gray-900 text-amber-500 border border-gray-900'
-                  : 'bg-white text-gray-500 hover:text-gray-900 border border-gray-200'
+                  ? 'bg-gray-900 text-amber-500 border border-gray-700'
+                  : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
               }`}
             >
               {cat}
@@ -45,7 +45,7 @@ const Services: React.FC = () => {
         {/* Services Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
           {filteredServices.map((service) => (
-            <div key={service.id} className="bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
+            <div key={service.id} className="bg-gray-800 rounded-sm overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
               <div className="h-64 overflow-hidden relative">
                 <img
                   src={service.image}
@@ -59,17 +59,17 @@ const Services: React.FC = () => {
               </div>
               <div className="p-8 flex flex-col h-auto">
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-xl font-bold text-gray-900 font-serif">{service.name}</h3>
+                  <h3 className="text-xl font-bold text-white font-serif">{service.name}</h3>
                   <span className="text-xl font-bold text-amber-600">${service.price}</span>
                 </div>
-                <p className="text-gray-500 text-sm mb-8 leading-relaxed">{service.description}</p>
+                <p className="text-gray-400 text-sm mb-8 leading-relaxed">{service.description}</p>
                 
                 <button
                   onClick={() => addToCart(service)}
                   disabled={isInCart(service.id)}
                   className={`w-full py-4 rounded-sm font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all ${
                     isInCart(service.id)
-                      ? 'bg-gray-100 text-gray-500 cursor-default'
+                      ? 'bg-gray-700 text-gray-400 cursor-default'
                       : 'bg-gray-900 text-white hover:bg-amber-600 hover:text-black'
                   }`}
                 >

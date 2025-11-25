@@ -1,4 +1,4 @@
-import { Service, Stylist } from './types';
+import { Service, Stylist, HairstyleData, BeardData } from './types';
 
 export const SERVICES: Service[] = [
   {
@@ -7,15 +7,15 @@ export const SERVICES: Service[] = [
     description: 'Precision scissor cut tailored to your head shape, finished with a straight razor neck shave and style.',
     price: 45,
     category: 'Haircuts',
-    image: 'https://images.unsplash.com/photo-1593702295094-aea22597af65?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    image: '/images/services/TheExecutiveCut.jpg',
   },
   {
     id: '2',
-    name: 'Skin Fade',
-    description: 'Seamless gradient fade from skin to length, featuring crisp line-ups and texture on top.',
+    name: 'Skin Mask',
+    description: 'Rejuvenating facial treatment with deep cleansing mask, exfoliation, and moisturizing therapy.',
     price: 50,
-    category: 'Haircuts',
-    image: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    category: 'Grooming',
+    image: '/images/services/FaceMask.jpg',
   },
   {
     id: '3',
@@ -23,7 +23,7 @@ export const SERVICES: Service[] = [
     description: 'A relaxing straight razor shave with hot towel treatment, essential oils, and post-shave balm.',
     price: 55,
     category: 'Beard & Shave',
-    image: 'https://images.unsplash.com/photo-1512690459411-b9245aed6191?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    image: '/images/services/TraditionalHotTowelShave.jpg',
   },
   {
     id: '4',
@@ -31,7 +31,7 @@ export const SERVICES: Service[] = [
     description: 'Expert shaping of the beard and mustache with razor lining and conditioning oil.',
     price: 35,
     category: 'Beard & Shave',
-    image: 'https://images.unsplash.com/photo-1503951914875-452162b7f30a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    image: '/images/services/BeardSculpt&Trim.jpg',
   },
   {
     id: '5',
@@ -39,7 +39,7 @@ export const SERVICES: Service[] = [
     description: 'Our signature haircut combined with a hot towel shave or beard sculpt. The ultimate grooming experience.',
     price: 90,
     category: 'Packages',
-    image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    image: '/images/services/TheGentlemanPackage.jpg',
   },
   {
     id: '6',
@@ -47,8 +47,384 @@ export const SERVICES: Service[] = [
     description: 'Exfoliating scalp therapy to promote hair health, accompanied by a 15-minute head massage.',
     price: 40,
     category: 'Grooming',
-    image: 'https://images.unsplash.com/photo-1585747831381-a6ead42e1485?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    image: '/images/services/ScalpTreatment&Massageman.jpg',
   },
+];
+
+export const HAIRSTYLES: HairstyleData[] = [
+  {
+    id: 'buzz-cut',
+    name: 'Buzz Cut',
+    description: 'Ultra-short uniform length all around. Perfect for low maintenance and athletic lifestyles.',
+    category: 'Classic',
+    faceShapeCompatibility: { oval: 95, round: 65, square: 95, heart: 75, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 95, curly: 95, coily: 95 },
+    maintenance: 'low',
+    occasions: ['casual', 'business', 'formal'],
+    image: '/images/hairstyles/BuzzCut.jpg',
+    scale: 1.1,
+    yOffset: -5,
+    tags: ['ultra-short', 'military', 'athletic', 'minimal']
+  },
+  {
+    id: 'crew-cut',
+    name: 'Crew Cut',
+    description: 'Short tapered sides with slightly longer top. Classic American style that works in any setting.',
+    category: 'Classic',
+    faceShapeCompatibility: { oval: 95, round: 80, square: 95, heart: 85, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 90, curly: 80, coily: 75 },
+    maintenance: 'low',
+    occasions: ['business', 'casual', 'formal'],
+    image: '/images/hairstyles/CrewCut.jpg',
+    scale: 1.1,
+    yOffset: -5,
+    tags: ['short', 'professional', 'timeless', 'versatile']
+  },
+  {
+    id: 'french-crop',
+    name: 'French Crop',
+    description: 'Short textured top with blunt fringe. Modern European style with minimal styling needed.',
+    category: 'Modern',
+    faceShapeCompatibility: { oval: 90, round: 80, square: 90, heart: 75, diamond: 85 },
+    hairTypeCompatibility: { straight: 85, wavy: 95, curly: 75, coily: 50 },
+    maintenance: 'low',
+    occasions: ['casual', 'business'],
+    image: '/images/hairstyles/FrenchCrop.jpg',
+    scale: 1.15,
+    yOffset: -3,
+    tags: ['textured', 'fringe', 'european', 'trendy']
+  },
+  {
+    id: 'textured-crop',
+    name: 'Textured Crop',
+    description: 'Choppy layers on top with short faded sides. Adds volume and movement for a modern edge.',
+    category: 'Modern',
+    faceShapeCompatibility: { oval: 90, round: 75, square: 95, heart: 85, diamond: 90 },
+    hairTypeCompatibility: { straight: 80, wavy: 95, curly: 90, coily: 70 },
+    maintenance: 'medium',
+    occasions: ['casual', 'business'],
+    image: '/images/hairstyles/TexturedCrop.jpg',
+    scale: 1.2,
+    yOffset: -8,
+    tags: ['messy', 'layered', 'volume', 'contemporary']
+  },
+  {
+    id: 'caesar-cut',
+    name: 'Caesar Cut',
+    description: 'Short horizontal fringe with uniform length. Named after Julius Caesar, timeless and masculine.',
+    category: 'Classic',
+    faceShapeCompatibility: { oval: 90, round: 70, square: 95, heart: 70, diamond: 85 },
+    hairTypeCompatibility: { straight: 95, wavy: 75, curly: 50, coily: 30 },
+    maintenance: 'low',
+    occasions: ['casual', 'business'],
+    image: '/images/hairstyles/CaesarCut.jpg',
+    scale: 1.1,
+    yOffset: -3,
+    tags: ['short', 'fringe', 'roman', 'masculine']
+  },
+  {
+    id: 'side-part',
+    name: 'Side Part',
+    description: 'Classic parted style with clean lines. The ultimate professional look for business settings.',
+    category: 'Professional',
+    faceShapeCompatibility: { oval: 95, round: 80, square: 95, heart: 85, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 85, curly: 60, coily: 40 },
+    maintenance: 'medium',
+    occasions: ['business', 'formal'],
+    image: '/images/hairstyles/SidePart.jpg',
+    scale: 1.2,
+    yOffset: -5,
+    tags: ['parted', 'professional', 'executive', 'polished']
+  },
+  {
+    id: 'pompadour',
+    name: 'Pompadour',
+    description: 'High volume swept back from forehead. Bold vintage style that commands attention.',
+    category: 'Classic',
+    faceShapeCompatibility: { oval: 80, round: 95, square: 85, heart: 90, diamond: 80 },
+    hairTypeCompatibility: { straight: 95, wavy: 85, curly: 60, coily: 30 },
+    maintenance: 'high',
+    occasions: ['formal', 'special'],
+    image: '/images/hairstyles/Pompadour.jpg',
+    scale: 1.3,
+    yOffset: -15,
+    tags: ['vintage', 'volume', 'rockabilly', 'dramatic']
+  },
+  {
+    id: 'quiff',
+    name: 'Quiff',
+    description: 'Textured volume pushed forward and up. Modern take on the pompadour with more versatility.',
+    category: 'Modern',
+    faceShapeCompatibility: { oval: 95, round: 90, square: 90, heart: 85, diamond: 90 },
+    hairTypeCompatibility: { straight: 90, wavy: 95, curly: 75, coily: 50 },
+    maintenance: 'medium',
+    occasions: ['casual', 'business', 'formal'],
+    image: '/images/hairstyles/Quiff.jpg',
+    scale: 1.25,
+    yOffset: -12,
+    tags: ['volume', 'textured', 'versatile', 'stylish']
+  },
+  {
+    id: 'faux-hawk',
+    name: 'Faux Hawk',
+    description: 'Center strip styled upward with tapered sides. Edgy but workplace-appropriate alternative to mohawk.',
+    category: 'Edgy',
+    faceShapeCompatibility: { oval: 90, round: 95, square: 80, heart: 90, diamond: 85 },
+    hairTypeCompatibility: { straight: 90, wavy: 90, curly: 85, coily: 80 },
+    maintenance: 'medium',
+    occasions: ['casual', 'creative'],
+    image: '/images/hairstyles/FauxHawk.jpg',
+    scale: 1.2,
+    yOffset: -10,
+    tags: ['edgy', 'spiky', 'bold', 'youthful']
+  },
+  {
+    id: 'undercut',
+    name: 'Undercut',
+    description: 'Disconnected long top with shaved sides. Versatile modern style with sharp contrast.',
+    category: 'Modern',
+    faceShapeCompatibility: { oval: 90, round: 80, square: 95, heart: 90, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 95, curly: 80, coily: 60 },
+    maintenance: 'medium',
+    occasions: ['casual', 'business', 'creative'],
+    image: '/images/hairstyles/Undercut.jpg',
+    scale: 1.2,
+    yOffset: -8,
+    tags: ['disconnected', 'contrast', 'modern', 'sharp']
+  },
+  {
+    id: 'slicked-back',
+    name: 'Slicked Back',
+    description: 'Hair combed straight back with shine. Sophisticated Wall Street style exuding confidence.',
+    category: 'Professional',
+    faceShapeCompatibility: { oval: 95, round: 70, square: 95, heart: 80, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 75, curly: 40, coily: 20 },
+    maintenance: 'medium',
+    occasions: ['business', 'formal'],
+    image: '/images/hairstyles/SlickedBack.jpg',
+    scale: 1.15,
+    yOffset: -5,
+    tags: ['sleek', 'sophisticated', 'corporate', 'polished']
+  },
+  {
+    id: 'man-bun',
+    name: 'Man Bun',
+    description: 'Long hair gathered into top knot. Relaxed bohemian style for creative professionals.',
+    category: 'Modern',
+    faceShapeCompatibility: { oval: 95, round: 75, square: 90, heart: 90, diamond: 95 },
+    hairTypeCompatibility: { straight: 90, wavy: 95, curly: 90, coily: 75 },
+    maintenance: 'low',
+    occasions: ['casual', 'creative'],
+    image: '/images/hairstyles/ManBun.jpg',
+    scale: 1.2,
+    yOffset: -10,
+    tags: ['long', 'tied', 'bohemian', 'relaxed']
+  },
+  {
+    id: 'top-knot',
+    name: 'Top Knot',
+    description: 'Undercut with high bun. Samurai-inspired style combining edge with tradition.',
+    category: 'Edgy',
+    faceShapeCompatibility: { oval: 90, round: 80, square: 85, heart: 90, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 90, curly: 75, coily: 60 },
+    maintenance: 'medium',
+    occasions: ['casual', 'creative'],
+    image: '/images/hairstyles/TopKnot.jpg',
+    scale: 1.25,
+    yOffset: -12,
+    tags: ['samurai', 'tied', 'edgy', 'cultural']
+  },
+  {
+    id: 'afro-fade',
+    name: 'Afro Fade',
+    description: 'Natural textured top with faded sides. Celebrates natural curl pattern with modern edge.',
+    category: 'Modern',
+    faceShapeCompatibility: { oval: 95, round: 90, square: 90, heart: 85, diamond: 90 },
+    hairTypeCompatibility: { straight: 5, wavy: 30, curly: 95, coily: 100 },
+    maintenance: 'medium',
+    occasions: ['casual', 'business'],
+    image: '/images/hairstyles/AfroFade.jpg',
+    scale: 1.3,
+    yOffset: -10,
+    tags: ['natural', 'textured', 'cultural', 'bold']
+  },
+  {
+    id: 'high-top-fade',
+    name: 'High Top Fade',
+    description: 'Flat top with high faded sides. Iconic 90s style making a strong comeback.',
+    category: 'Retro',
+    faceShapeCompatibility: { oval: 90, round: 95, square: 90, heart: 85, diamond: 85 },
+    hairTypeCompatibility: { straight: 10, wavy: 40, curly: 95, coily: 100 },
+    maintenance: 'high',
+    occasions: ['casual', 'creative'],
+    image: '/images/hairstyles/HighTopFade.jpg',
+    scale: 1.4,
+    yOffset: -15,
+    tags: ['retro', '90s', 'geometric', 'statement']
+  },
+  {
+    id: 'mullet',
+    name: 'Mullet',
+    description: 'Short front, long back. Rebellious retro style experiencing modern renaissance.',
+    category: 'Edgy',
+    faceShapeCompatibility: { oval: 85, round: 70, square: 85, heart: 90, diamond: 95 },
+    hairTypeCompatibility: { straight: 85, wavy: 95, curly: 85, coily: 60 },
+    maintenance: 'medium',
+    occasions: ['casual', 'creative'],
+    image: '/images/hairstyles/Mullet.jpg',
+    scale: 1.2,
+    yOffset: -8,
+    tags: ['retro', 'rebellious', 'unconventional', 'statement']
+  },
+  {
+    id: 'mohawk',
+    name: 'Mohawk',
+    description: 'Shaved sides with tall center strip. Punk rock statement for the bold and fearless.',
+    category: 'Edgy',
+    faceShapeCompatibility: { oval: 85, round: 90, square: 80, heart: 85, diamond: 85 },
+    hairTypeCompatibility: { straight: 90, wavy: 85, curly: 95, coily: 95 },
+    maintenance: 'high',
+    occasions: ['casual', 'creative'],
+    image: '/images/hairstyles/Mohawk.jpg',
+    scale: 1.3,
+    yOffset: -12,
+    tags: ['punk', 'extreme', 'rebellious', 'dramatic']
+  },
+  {
+    id: 'curtain-bangs',
+    name: 'Curtain Bangs',
+    description: 'Center-parted fringe framing face. 90s heartthrob style for straight to wavy hair.',
+    category: 'Modern',
+    faceShapeCompatibility: { oval: 95, round: 55, square: 65, heart: 95, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 90, curly: 30, coily: 10 },
+    maintenance: 'medium',
+    occasions: ['casual', 'creative'],
+    image: '/images/hairstyles/CurtainBangs.jpg',
+    scale: 1.2,
+    yOffset: -5,
+    tags: ['90s', 'parted', 'fringe', 'youthful']
+  },
+  {
+    id: 'taper-fade',
+    name: 'Taper Fade',
+    description: 'Gradual fade from longer to shorter. Most versatile cut that works for everyone.',
+    category: 'Classic',
+    faceShapeCompatibility: { oval: 95, round: 90, square: 95, heart: 90, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 95, curly: 95, coily: 95 },
+    maintenance: 'low',
+    occasions: ['business', 'casual', 'formal'],
+    image: '/images/hairstyles/TaperFade.jpg',
+    scale: 1.1,
+    yOffset: -5,
+    tags: ['fade', 'versatile', 'clean', 'universal']
+  },
+  {
+    id: 'bald-fade',
+    name: 'Bald Fade',
+    description: 'Skin fade blending to longer top. Sharp modern look with maximum contrast.',
+    category: 'Modern',
+    faceShapeCompatibility: { oval: 95, round: 85, square: 95, heart: 85, diamond: 90 },
+    hairTypeCompatibility: { straight: 95, wavy: 95, curly: 95, coily: 95 },
+    maintenance: 'medium',
+    occasions: ['casual', 'business'],
+    image: '/images/hairstyles/BaldFade.jpg',
+    scale: 1.1,
+    yOffset: -5,
+    tags: ['skin-fade', 'sharp', 'modern', 'precise']
+  }
+];
+
+export const BEARDS: BeardData[] = [
+  {
+    id: 'stubble',
+    name: 'Stubble',
+    description: '1-3mm growth. Rugged masculine look that enhances jawline definition.',
+    faceShapeCompatibility: { oval: 95, round: 90, square: 95, heart: 90, diamond: 95 },
+    maintenance: 'low',
+    image: '/images/beards/Stubble.jpg',
+    tags: ['short', 'rugged', 'masculine', 'low-effort']
+  },
+  {
+    id: 'goatee',
+    name: 'Goatee',
+    description: 'Chin beard with or without mustache. Adds length to round faces, classic rebel style.',
+    faceShapeCompatibility: { oval: 90, round: 95, square: 80, heart: 75, diamond: 90 },
+    maintenance: 'medium',
+    image: '/images/beards/Goatee.jpg',
+    tags: ['chin', 'classic', 'defined', 'artistic']
+  },
+  {
+    id: 'circle-beard',
+    name: 'Circle Beard',
+    description: 'Connected mustache and chin beard. Professional style that frames the mouth.',
+    faceShapeCompatibility: { oval: 95, round: 90, square: 95, heart: 85, diamond: 90 },
+    maintenance: 'medium',
+    image: '/images/beards/CircleBeard.jpg',
+    tags: ['professional', 'neat', 'balanced', 'corporate']
+  },
+  {
+    id: 'anchor-beard',
+    name: 'Anchor Beard',
+    description: 'Pointed chin beard following jawline. Sophisticated style that elongates face.',
+    faceShapeCompatibility: { oval: 90, round: 95, square: 80, heart: 75, diamond: 90 },
+    maintenance: 'high',
+    image: '/images/beards/AnchorBeard.jpg',
+    tags: ['pointed', 'sophisticated', 'sculpted', 'refined']
+  },
+  {
+    id: 'balbo-beard',
+    name: 'Balbo Beard',
+    description: 'Disconnected mustache and chin beard. Bold Italian style with strong character.',
+    faceShapeCompatibility: { oval: 90, round: 85, square: 95, heart: 80, diamond: 90 },
+    maintenance: 'high',
+    image: '/images/beards/BalboBeard.jpg',
+    tags: ['disconnected', 'italian', 'bold', 'distinctive']
+  },
+  {
+    id: 'royale-beard',
+    name: 'Royale Beard',
+    description: 'Mustache with narrow chin strip. Minimalist regal style with clean lines.',
+    faceShapeCompatibility: { oval: 90, round: 85, square: 90, heart: 85, diamond: 90 },
+    maintenance: 'medium',
+    image: '/images/beards/RoyaleBeard.jpg',
+    tags: ['minimal', 'regal', 'narrow', 'elegant']
+  },
+  {
+    id: 'van-dyke-beard',
+    name: 'Van Dyke Beard',
+    description: 'Disconnected goatee and mustache. Artistic intellectual style with historical roots.',
+    faceShapeCompatibility: { oval: 90, round: 95, square: 80, heart: 90, diamond: 90 },
+    maintenance: 'high',
+    image: '/images/beards/VanDykeBeard.jpg',
+    tags: ['artistic', 'intellectual', 'classic', 'distinguished']
+  },
+  {
+    id: 'short-boxed-beard',
+    name: 'Short Boxed Beard',
+    description: 'Full beard trimmed to uniform short length. Professional full coverage with clean edges.',
+    faceShapeCompatibility: { oval: 95, round: 90, square: 95, heart: 90, diamond: 95 },
+    maintenance: 'medium',
+    image: '/images/beards/ShortBoxedBeard.jpg',
+    tags: ['full', 'professional', 'uniform', 'neat']
+  },
+  {
+    id: 'corporate-beard',
+    name: 'Corporate Beard',
+    description: 'Well-groomed medium full beard. Executive style that commands respect.',
+    faceShapeCompatibility: { oval: 95, round: 85, square: 90, heart: 95, diamond: 90 },
+    maintenance: 'medium',
+    image: '/images/beards/CorporateBeard.jpg',
+    tags: ['executive', 'groomed', 'professional', 'mature']
+  },
+  {
+    id: 'full-beard',
+    name: 'Full Beard',
+    description: 'Natural full growth covering cheeks and neck. Masculine statement of strength and wisdom.',
+    faceShapeCompatibility: { oval: 95, round: 75, square: 90, heart: 95, diamond: 95 },
+    maintenance: 'high',
+    image: '/images/beards/FullBeard.jpg',
+    tags: ['full', 'natural', 'masculine', 'bold']
+  }
 ];
 
 export const STYLISTS: Stylist[] = [
@@ -57,7 +433,7 @@ export const STYLISTS: Stylist[] = [
     name: 'Marcus Thorne',
     role: 'Master Barber',
     bio: 'Marcus blends old-school barbering techniques with modern styling to create timeless looks for the modern gentleman.',
-    image: 'https://images.unsplash.com/photo-1582095133179-e8747d2d11f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    image: '/images/barbers/marcus-thorne.jpg',
     specialties: ['Hot Towel Shaves', 'Precision Shear Work', 'Classic Pompadours'],
   },
   {
@@ -65,7 +441,7 @@ export const STYLISTS: Stylist[] = [
     name: 'James "Jax" Jackson',
     role: 'Fade Specialist',
     bio: 'Known for the sharpest line-ups in the city, Jax specializes in modern urban cuts and intricate designs.',
-    image: 'https://images.unsplash.com/photo-1480455624313-e29b44bbfde1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    image: '/images/barbers/james-jax-jackson.jpg',
     specialties: ['Skin Fades', 'Hair Tattoos', 'Beard Shaping'],
   },
   {
@@ -73,7 +449,7 @@ export const STYLISTS: Stylist[] = [
     name: 'Leo Varas',
     role: 'Senior Stylist',
     bio: 'Leo brings 10 years of international experience, specializing in longer men\'s hairstyles and texture management.',
-    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    image: '/images/barbers/leo-varas.jpg',
     specialties: ['Long Hair Styling', 'Texturizing', 'Grey Blending'],
   },
 ];
