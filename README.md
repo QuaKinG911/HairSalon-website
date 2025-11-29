@@ -4,8 +4,6 @@
 
 A premium, full-stack men's grooming platform that combines traditional barbering excellence with cutting-edge AI technology. Luxe Barber offers a seamless experience for customers to discover styles, book appointments, and manage their grooming journey.
 
-![Luxe Barber Banner](https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop)
-
 ## ✨ Key Features
 
 ### 🤖 AI-Powered Style Consultation
