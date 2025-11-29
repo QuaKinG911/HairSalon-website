@@ -99,6 +99,8 @@ export const bookingsAPI = {
   delete: (id: string) => apiRequest(`/bookings/${id}`, {
     method: 'DELETE',
   }),
+  checkAvailability: (date: string, time: string, barberId?: string) =>
+    apiRequest(`/bookings/check-availability?date=${date}&time=${time}${barberId ? `&barberId=${barberId}` : ''}`),
 };
 
 // Contact API

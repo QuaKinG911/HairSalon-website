@@ -135,4 +135,41 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Add saved style
+router.post('/:id/saved-styles', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { style } = req.body;
+
+    const savedStyles = db.addSavedStyle(id, style);
+
+    if (!savedStyles) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(savedStyles);
+  } catch (error) {
+    console.error('Add saved style error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Remove saved style
+router.delete('/:id/saved-styles/:styleId', async (req, res) => {
+  try {
+    const { id, styleId } = req.params;
+
+    const savedStyles = db.removeSavedStyle(id, styleId);
+
+    if (!savedStyles) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(savedStyles);
+  } catch (error) {
+    console.error('Remove saved style error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

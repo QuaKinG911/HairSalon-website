@@ -7,70 +7,43 @@
       "role": "admin",
       "name": "Admin User",
       "phone": null,
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 2,
-      "email": "barber@hairsalon.com",
+      "email": "marcus@hairsalon.com",
       "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
       "role": "barber",
-      "name": "John Barber",
+      "name": "Marcus Thorne",
       "phone": "+1234567890",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 3,
+      "email": "jax@hairsalon.com",
+      "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "barber",
+      "name": "James \"Jax\" Jackson",
+      "phone": "+1234567891",
+      "created_at": "2025-11-29T19:28:29.399Z"
+    },
+    {
+      "id": 4,
+      "email": "leo@hairsalon.com",
+      "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "barber",
+      "name": "Leo Varas",
+      "phone": "+1234567892",
+      "created_at": "2025-11-29T19:28:29.399Z"
+    },
+    {
+      "id": 5,
       "email": "customer@example.com",
       "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
       "role": "customer",
       "name": "Jane Customer",
       "phone": "+0987654321",
-      "created_at": "2025-11-23T15:59:36.232Z"
-    },
-    {
-      "id": 4,
-      "email": "test@example.com",
-      "password": "$2a$10$R3Y33yFb7vHCDzv.Ysyg9evkzDZZGUO5uRPuWziv9G4ZNCXsmDBU.",
-      "role": "customer",
-      "name": "Test User",
-      "phone": "+1234567890",
-      "created_at": "2025-11-23T16:11:07.586Z"
-    },
-    {
-      "id": 5,
-      "email": "hafid@hafid.com",
-      "password": "$2a$10$K1sCxAWjl3NOmwlOHTa1mOec1ikrs9cfdABD.8MNi/mAuuTimgfK6",
-      "role": "customer",
-      "name": "Hafid",
-      "phone": "99999999999999",
-      "created_at": "2025-11-23T16:14:09.104Z"
-    },
-    {
-      "id": 6,
-      "email": "marcus@luxebarbers.com",
-      "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "barber",
-      "name": "Marcus Thorne",
-      "phone": null,
-      "created_at": "2025-11-23T15:59:36.232Z"
-    },
-    {
-      "id": 7,
-      "email": "jax@luxebarbers.com",
-      "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "barber",
-      "name": "James \"Jax\" Jackson",
-      "phone": null,
-      "created_at": "2025-11-23T15:59:36.232Z"
-    },
-    {
-      "id": 8,
-      "email": "leo@luxebarbers.com",
-      "password": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "barber",
-      "name": "Leo Varas",
-      "phone": null,
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     }
   ],
   "services": [
@@ -82,7 +55,7 @@
       "category": "Haircuts",
       "image": "/images/services/TheExecutiveCut.jpg",
       "duration": "45 minutes",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 2,
@@ -92,7 +65,7 @@
       "category": "Grooming",
       "image": "/images/services/FaceMask.jpg",
       "duration": "30 minutes",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 3,
@@ -102,7 +75,7 @@
       "category": "Beard & Shave",
       "image": "/images/services/TraditionalHotTowelShave.jpg",
       "duration": "45 minutes",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 4,
@@ -112,7 +85,7 @@
       "category": "Beard & Shave",
       "image": "/images/services/BeardSculpt&Trim.jpg",
       "duration": "30 minutes",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 5,
@@ -122,7 +95,7 @@
       "category": "Packages",
       "image": "/images/services/TheGentlemanPackage.jpg",
       "duration": "90 minutes",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 6,
@@ -132,39 +105,69 @@
       "category": "Grooming",
       "image": "/images/services/ScalpTreatment&Massageman.jpg",
       "duration": "45 minutes",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "created_at": "2025-11-29T19:28:29.399Z"
     }
   ],
   "barbers": [
     {
       "id": 1,
       "name": "Marcus Thorne",
-      "email": "marcus@luxebarbers.com",
       "role": "Master Barber",
       "bio": "Marcus blends old-school barbering techniques with modern styling to create timeless looks for the modern gentleman.",
       "image": "/images/barbers/marcus-thorne.jpg",
       "specialties": "[\"Hot Towel Shaves\", \"Precision Shear Work\", \"Classic Pompadours\"]",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "schedule": {
+        "days": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 2,
       "name": "James \"Jax\" Jackson",
-      "email": "jax@luxebarbers.com",
       "role": "Fade Specialist",
       "bio": "Known for the sharpest line-ups in the city, Jax specializes in modern urban cuts and intricate designs.",
       "image": "/images/barbers/james-jax-jackson.jpg",
       "specialties": "[\"Skin Fades\", \"Hair Tattoos\", \"Beard Shaping\"]",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "schedule": {
+        "days": [
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "start": "10:00",
+        "end": "18:00"
+      },
+      "created_at": "2025-11-29T19:28:29.399Z"
     },
     {
       "id": 3,
       "name": "Leo Varas",
-      "email": "leo@luxebarbers.com",
       "role": "Senior Stylist",
       "bio": "Leo brings 10 years of international experience, specializing in longer men's hairstyles and texture management.",
       "image": "/images/barbers/leo-varas.jpg",
       "specialties": "[\"Long Hair Styling\", \"Texturizing\", \"Grey Blending\"]",
-      "created_at": "2025-11-23T15:59:36.232Z"
+      "schedule": {
+        "days": [
+          "Monday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "start": "09:00",
+        "end": "16:00"
+      },
+      "created_at": "2025-11-29T19:28:29.399Z"
     }
   ],
   "bookings": [],

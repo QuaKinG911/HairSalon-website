@@ -27,6 +27,96 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Check availability
+router.get('/check-availability', async (req, res) => {
+  try {
+    const { date, time, barberId } = req.query;
+
+    if (!date || !time) {
+      return res.status(400).json({ error: 'Date and time are required' });
+    }
+
+    const bookings = db.getBookings();
+    const barbers = db.getBarbers();
+    const requestedDate = new Date(date);
+    const dayName = requestedDate.toLocaleDateString('en-US', { weekday: 'long' });
+
+    // Helper to check if time is within schedule
+    const isWithinSchedule = (barber, timeStr) => {
+      if (!barber.schedule) return true; // Assume available if no schedule
+      if (!barber.schedule.days.includes(dayName)) return false;
+      return timeStr >= barber.schedule.start && timeStr < barber.schedule.end;
+    };
+
+    // Helper to check if barber is booked
+    const isBooked = (barberId, dateStr, timeStr) => {
+      return bookings.some(b =>
+        b.barber_id === parseInt(barberId) &&
+        b.date === dateStr &&
+        b.time === timeStr &&
+        b.status !== 'cancelled'
+      );
+    };
+
+    const availableBarbers = barbers.filter(barber => {
+      return isWithinSchedule(barber, time) && !isBooked(barber.id, date, time);
+    });
+
+    let response = {
+      availableBarbers: availableBarbers.map(b => ({ id: b.id, name: b.name })),
+      requestedBarberStatus: 'unknown',
+      message: ''
+    };
+
+    if (barberId) {
+      const barber = barbers.find(b => b.id === parseInt(barberId));
+      if (!barber) {
+        response.requestedBarberStatus = 'unknown';
+        response.message = 'Barber not found';
+      } else if (!isWithinSchedule(barber, time)) {
+        response.requestedBarberStatus = 'off_schedule';
+        response.message = `Sorry, ${barber.name} is not working at that time.`;
+      } else if (isBooked(barberId, date, time)) {
+        response.requestedBarberStatus = 'booked';
+        response.message = `Sorry, ${barber.name} is already booked at that time.`;
+      } else {
+        response.requestedBarberStatus = 'available';
+        response.message = `${barber.name} is available.`;
+      }
+    } else {
+      if (availableBarbers.length === 0) {
+        response.message = 'Sorry, none of the barbers are available at that time. Please check the schedule.';
+      } else {
+        response.message = 'Barbers are available.';
+      }
+    }
+
+    res.json(response);
+  } catch (error) {
+    console.error('Check availability error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get bookings by customer ID
+router.get('/customer/:customerId', async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const bookings = db.getBookingsByCustomer(customerId).map(booking => {
+      const barber = booking.barber_id ? db.getBarberById(booking.barber_id) : null;
+      return {
+        ...booking,
+        barber_name: barber?.name || booking.barber_name
+      };
+    });
+
+    res.json(bookings);
+  } catch (error) {
+    console.error('Get customer bookings error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get booking by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -51,25 +141,6 @@ router.get('/:id', async (req, res) => {
     res.json(bookingWithDetails);
   } catch (error) {
     console.error('Get booking error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get bookings by customer ID
-router.get('/customer/:customerId', async (req, res) => {
-  try {
-    const { customerId } = req.params;
-    const bookings = db.getBookingsByCustomer(customerId).map(booking => {
-      const barber = booking.barber_id ? db.getBarberById(booking.barber_id) : null;
-      return {
-        ...booking,
-        barber_name: barber?.name || booking.barber_name
-      };
-    });
-
-    res.json(bookings);
-  } catch (error) {
-    console.error('Get customer bookings error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

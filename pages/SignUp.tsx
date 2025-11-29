@@ -223,7 +223,7 @@ const SignUp: React.FC = () => {
                     <div className="mt-4 text-center">
                         <button
                             onClick={() => navigate('/')}
-                            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                            className="text-sm text-gray-400 hover:text-gray-200 transition-colors"
                         >
                             ← Back to Home
                         </button>

@@ -1,21 +1,33 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Upload, RefreshCw, Download, Sparkles, AlertCircle, CheckCircle2, ArrowRight, ArrowLeft, Star, Clock, Briefcase, Crown, Scissors } from 'lucide-react';
 import { aiService } from '../services/aiService';
 import { FaceAnalysis, HairstyleRecommendation, UserPreferences } from '../types';
 import { useBooking } from '../context/BookingContext';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 type AppState = 'initial' | 'preferences' | 'analyzing' | 'results';
 
 const AITryOn: React.FC = () => {
-  const [state, setState] = useState<AppState>('initial');
-  const [userImage, setUserImage] = useState<string | null>(null);
-  const [faceAnalysis, setFaceAnalysis] = useState<FaceAnalysis | null>(null);
-  const [recommendations, setRecommendations] = useState<HairstyleRecommendation[]>([]);
-  const [preferences, setPreferences] = useState<UserPreferences>({});
+  const [state, setState] = useState<AppState>(() => {
+    return (sessionStorage.getItem('aiState') as AppState) || 'initial';
+  });
+  const [userImage, setUserImage] = useState<string | null>(() => {
+    return sessionStorage.getItem('aiUserImage');
+  });
+  const [faceAnalysis, setFaceAnalysis] = useState<FaceAnalysis | null>(() => {
+    const saved = sessionStorage.getItem('aiFaceAnalysis');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [recommendations, setRecommendations] = useState<HairstyleRecommendation[]>(() => {
+    const saved = sessionStorage.getItem('aiRecommendations');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [preferences, setPreferences] = useState<UserPreferences>(() => {
+    const saved = sessionStorage.getItem('aiPreferences');
+    return saved ? JSON.parse(saved) : {};
+  });
   const [selectedStyle, setSelectedStyle] = useState<HairstyleRecommendation | null>(null);
-  const [savedStyles, setSavedStyles] = useState<HairstyleRecommendation[]>([]);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { addToCart } = useBooking();
@@ -76,22 +88,20 @@ const AITryOn: React.FC = () => {
     setPreferences({});
     setSelectedStyle(null);
     setState('initial');
+
+    // Clear session storage
+    sessionStorage.removeItem('aiState');
+    sessionStorage.removeItem('aiUserImage');
+    sessionStorage.removeItem('aiFaceAnalysis');
+    sessionStorage.removeItem('aiRecommendations');
+    sessionStorage.removeItem('aiPreferences');
   };
 
   const updatePreference = (key: keyof UserPreferences, value: string) => {
     setPreferences(prev => ({ ...prev, [key]: value }));
   };
 
-  const saveStyle = (style: HairstyleRecommendation) => {
-    if (!savedStyles.find(s => s.id === style.id)) {
-      setSavedStyles(prev => [...prev, style]);
-    }
-  };
-
-  const removeSavedStyle = (styleId: string) => {
-    setSavedStyles(prev => prev.filter(s => s.id !== styleId));
-  };
-
+  const { user } = useAuth();
 
 
   const shareStyle = async (style: HairstyleRecommendation) => {
@@ -115,25 +125,45 @@ const AITryOn: React.FC = () => {
   };
 
   const bookStyle = (style: HairstyleRecommendation) => {
-    // Map hairstyle to appropriate service based on style characteristics
-    const serviceMapping: Record<string, string> = {
-      'modern-quiff': '1', // The Executive Cut
-      'pompadour': '1', // The Executive Cut
-      'side-part': '1', // The Executive Cut
-      'textured-crop': '2', // Skin Fade
-      'faux-hawk': '2', // Skin Fade
-      'french-crop': '2', // Skin Fade
-      'undercut': '2', // Skin Fade
-      'ivy-league': '1' // The Executive Cut
-    };
-
-    const serviceId = serviceMapping[style.id] || '1'; // Default to Executive Cut
-
     // Import services to find the right one
     import('../constants').then(({ SERVICES }) => {
+      let serviceId = '1'; // Default to Executive Cut
+      let note = `Style: ${style.name}`;
+
+      if (style.type === 'combo') {
+        // The Gentleman's Package
+        serviceId = '5';
+        note = `Combo: ${style.name}`;
+      } else if (style.type === 'beard') {
+        // Beard Sculpt & Trim
+        serviceId = '4';
+      } else {
+        // Hair mapping
+        const serviceMapping: Record<string, string> = {
+          'modern-quiff': '1', // The Executive Cut
+          'pompadour': '1', // The Executive Cut
+          'side-part': '1', // The Executive Cut
+          'textured-crop': '2', // Skin Fade (mapped to Skin Mask in constants? Let's check constants)
+          'faux-hawk': '2',
+          'french-crop': '2',
+          'undercut': '2',
+          'ivy-league': '1'
+        };
+        // Note: In constants.ts, ID 2 is "Skin Mask", ID 1 is "The Executive Cut". 
+        // ID 4 is "Beard Sculpt & Trim". ID 5 is "The Gentleman's Package".
+        // We should probably map fades to Executive Cut for now if "Skin Fade" isn't a service, 
+        // or check if "Skin Mask" was a typo in my reading of constants.
+        // Let's assume ID 1 is the safe bet for haircuts if unsure.
+        serviceId = serviceMapping[style.id] || '1';
+      }
+
       const service = SERVICES.find(s => s.id === serviceId);
       if (service) {
-        addToCart(service);
+        // Add with note
+        addToCart({
+          ...service,
+          note: note
+        });
         navigate('/booking');
       }
     });
@@ -211,7 +241,7 @@ const AITryOn: React.FC = () => {
         {state === 'preferences' && (
           <div className="max-w-2xl mx-auto space-y-8">
             <div className="text-center">
-              <h2 className="text-2xl font-serif font-bold text-gray-900 mb-2">Tell Us About Your Style</h2>
+              <h2 className="text-2xl font-serif font-bold text-white mb-2">Tell Us About Your Style</h2>
               <p className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-700">Help us personalize your recommendations</p>
             </div>
 
@@ -295,7 +325,7 @@ const AITryOn: React.FC = () => {
               />
             </div>
             <div>
-              <h3 className="text-2xl font-serif font-bold text-gray-900 mb-2">AI Analysis in Progress...</h3>
+              <h3 className="text-2xl font-serif font-bold text-white mb-2">AI Analysis in Progress...</h3>
               <p className="text-gray-500 animate-pulse">Detecting face shape • Analyzing hair type • Generating recommendations</p>
             </div>
           </div>
@@ -392,7 +422,7 @@ const AITryOn: React.FC = () => {
             </div>
 
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Your Personalized Recommendations</h2>
+              <h2 className="text-2xl font-bold text-white">Your Personalized Recommendations</h2>
               <div className="flex gap-3">
                 <button
                   onClick={reset}
@@ -405,28 +435,11 @@ const AITryOn: React.FC = () => {
 
 
 
-            {savedStyles.length > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <h3 className="font-bold text-green-900 mb-2">Saved Styles ({savedStyles.length}):</h3>
-                <div className="flex flex-wrap gap-2">
-                  {savedStyles.map(style => (
-                    <div key={style.id} className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                      <span>{style.name}</span>
-                      <button
-                        onClick={() => removeSavedStyle(style.id)}
-                        className="text-green-600 hover:text-green-800"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+
 
             {/* Haircut Recommendations */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
                 <Scissors className="text-amber-600" size={24} />
                 Other Recommended Haircuts
               </h2>
@@ -463,16 +476,6 @@ const AITryOn: React.FC = () => {
                         >
                           Book This Style
                         </button>
-                        <button
-                          onClick={() => saveStyle(style)}
-                          disabled={savedStyles.some(s => s.id === style.id)}
-                          className={`w-full py-2 px-3 rounded-sm text-xs font-bold transition-all ${savedStyles.some(s => s.id === style.id)
-                            ? 'bg-green-100 text-green-700 cursor-default'
-                            : 'bg-gray-900 text-white hover:bg-amber-600'
-                            }`}
-                        >
-                          {savedStyles.some(s => s.id === style.id) ? 'Saved' : 'Save'}
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -482,7 +485,7 @@ const AITryOn: React.FC = () => {
 
             {/* Beard Recommendations */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
                 <Star className="text-amber-600" />
                 Other Recommended Beard Styles
               </h2>
@@ -525,16 +528,6 @@ const AITryOn: React.FC = () => {
                           className="w-full py-2 px-3 bg-amber-600 text-white rounded-sm text-sm font-bold hover:bg-amber-500 transition-all"
                         >
                           Book This Style
-                        </button>
-                        <button
-                          onClick={() => saveStyle(style)}
-                          disabled={savedStyles.some(s => s.id === style.id)}
-                          className={`w-full py-2 px-3 rounded-sm text-xs font-bold transition-all ${savedStyles.some(s => s.id === style.id)
-                            ? 'bg-green-100 text-green-700 cursor-default'
-                            : 'bg-gray-900 text-white hover:bg-amber-600'
-                            }`}
-                        >
-                          {savedStyles.some(s => s.id === style.id) ? 'Saved' : 'Save'}
                         </button>
                       </div>
                     </div>

@@ -6,6 +6,7 @@ export interface Service {
   category: 'Haircuts' | 'Beard & Shave' | 'Grooming' | 'Packages';
   image: string;
   duration?: string;
+  note?: string;
 }
 
 export interface Stylist {
@@ -94,6 +95,7 @@ export interface User {
   role: string;
   name: string;
   phone?: string;
+  saved_styles?: HairstyleRecommendation[];
 }
 
 export interface Message {

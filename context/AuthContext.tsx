@@ -1,13 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authAPI } from '../src/api';
-
-interface User {
-    id: string;
-    email: string;
-    role: 'admin' | 'barber' | 'customer';
-    name: string;
-    phone?: string;
-}
+import { User } from '../types';
 
 interface AuthContextType {
     user: User | null;

@@ -14,7 +14,6 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import BarberDashboard from './pages/barber/Dashboard';
 import CustomerBookings from './pages/customer/MyBookings';
-import CustomerMessages from './pages/customer/Messages';
 import SignUp from './pages/SignUp';
 
 const App: React.FC = () => {
@@ -44,11 +43,6 @@ const App: React.FC = () => {
               <Route path="my-bookings" element={
                 <ProtectedRoute allowedRoles={['customer']}>
                   <CustomerBookings />
-                </ProtectedRoute>
-              } />
-              <Route path="messages" element={
-                <ProtectedRoute allowedRoles={['customer', 'admin', 'barber']}>
-                  <CustomerMessages />
                 </ProtectedRoute>
               } />
             </Route>

@@ -6,6 +6,8 @@ import AdminServices from './Services';
 import AdminBarbers from './Barbers';
 import AdminMessages from './Messages';
 
+import { messagesAPI, usersAPI, bookingsAPI, servicesAPI } from '../../src/api';
+
 const AdminDashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -19,19 +21,28 @@ const AdminDashboard: React.FC = () => {
     });
 
     useEffect(() => {
-        // Load stats from localStorage
-        const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-        const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-        const services = JSON.parse(localStorage.getItem('services') || '[]');
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-
-        setStats({
-            totalBookings: bookings.length,
-            totalMessages: messages.filter((m: any) => !m.read).length,
-            totalServices: services.length,
-            totalCustomers: users.filter((u: any) => u.role === 'customer').length,
-        });
+        loadStats();
     }, []);
+
+    const loadStats = async () => {
+        try {
+            const [bookings, messages, services, users] = await Promise.all([
+                bookingsAPI.getAll(),
+                messagesAPI.getMyMessages(),
+                servicesAPI.getAll(),
+                usersAPI.getAll()
+            ]);
+
+            setStats({
+                totalBookings: bookings.length,
+                totalMessages: messages.filter((m: any) => !m.read).length,
+                totalServices: services.length,
+                totalCustomers: users.filter((u: any) => u.role === 'customer').length,
+            });
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    };
 
     const handleLogout = () => {
         logout();

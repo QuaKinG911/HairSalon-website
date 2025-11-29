@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Calendar, Clock, Search, Package, CreditCard, User, Phone, Mail, MessageSquare, LayoutDashboard, ChevronRight, CheckCircle, XCircle, Save } from 'lucide-react';
+import { LogOut, Calendar, Clock, Search, Package, CreditCard, User as UserIcon, Phone, Mail, MessageSquare, LayoutDashboard, ChevronRight, CheckCircle, XCircle, Save } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+
+import { messagesAPI, usersAPI } from '../../src/api';
+import { Message, User } from '../../types';
 
 interface Booking {
     id: string;
@@ -27,6 +30,7 @@ interface ContactMessage {
     message: string;
     createdAt: string;
     read: boolean;
+    senderId: number;
 }
 
 interface ScheduleSlot {
@@ -40,7 +44,9 @@ interface ScheduleSlot {
 const BarberDashboard: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<'overview' | 'bookings' | 'messages' | 'schedule'>('overview');
+    const activeTabState = useState<'overview' | 'bookings' | 'messages' | 'schedule'>('overview');
+    const activeTab = activeTabState[0];
+    const setActiveTab = activeTabState[1];
 
     // Data states
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -65,7 +71,7 @@ const BarberDashboard: React.FC = () => {
         loadSchedule();
     }, []);
 
-    const loadData = () => {
+    const loadData = async () => {
         // Load Bookings
         const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
         allBookings.sort((a: Booking, b: Booking) =>
@@ -73,12 +79,31 @@ const BarberDashboard: React.FC = () => {
         );
         setBookings(allBookings);
 
-        // Load Messages
-        const savedMessages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-        savedMessages.sort((a: ContactMessage, b: ContactMessage) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        setMessages(savedMessages);
+        // Load Messages from API
+        try {
+            const [msgs, users] = await Promise.all([
+                messagesAPI.getMyMessages(),
+                usersAPI.getAll()
+            ]);
+
+            const formattedMessages = msgs.map((m: Message) => {
+                const sender = users.find((u: User) => u.id === m.sender_id);
+                return {
+                    id: m.id,
+                    name: sender?.name || 'Unknown',
+                    email: sender?.email || 'Unknown',
+                    subject: m.subject,
+                    message: m.content,
+                    createdAt: m.created_at,
+                    read: m.read,
+                    senderId: m.sender_id
+                };
+            });
+
+            setMessages(formattedMessages);
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
     };
 
     const loadSchedule = () => {
@@ -166,12 +191,16 @@ const BarberDashboard: React.FC = () => {
         }
     };
 
-    const markAsRead = (id: string) => {
-        const updatedMessages = messages.map(m =>
-            m.id === id ? { ...m, read: true } : m
-        );
-        setMessages(updatedMessages);
-        localStorage.setItem('contactMessages', JSON.stringify(updatedMessages));
+    const markAsRead = async (id: string) => {
+        try {
+            await messagesAPI.markAsRead(id);
+            // Update local state
+            setMessages(prev => prev.map(m =>
+                m.id === id ? { ...m, read: true } : m
+            ));
+        } catch (error) {
+            console.error('Error marking message as read:', error);
+        }
     };
 
     const handleSelectMessage = (message: ContactMessage) => {

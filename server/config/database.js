@@ -41,15 +41,33 @@ class SimpleDatabase {
         },
         {
           id: 2,
-          email: 'barber@hairsalon.com',
+          email: 'marcus@hairsalon.com',
           password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
           role: 'barber',
-          name: 'John Barber',
+          name: 'Marcus Thorne',
           phone: '+1234567890',
           created_at: new Date().toISOString()
         },
         {
           id: 3,
+          email: 'jax@hairsalon.com',
+          password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
+          role: 'barber',
+          name: 'James "Jax" Jackson',
+          phone: '+1234567891',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 4,
+          email: 'leo@hairsalon.com',
+          password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
+          role: 'barber',
+          name: 'Leo Varas',
+          phone: '+1234567892',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 5,
           email: 'customer@example.com',
           password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
           role: 'customer',
@@ -128,6 +146,11 @@ class SimpleDatabase {
           bio: 'Marcus blends old-school barbering techniques with modern styling to create timeless looks for the modern gentleman.',
           image: '/images/barbers/marcus-thorne.jpg',
           specialties: '["Hot Towel Shaves", "Precision Shear Work", "Classic Pompadours"]',
+          schedule: {
+            days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+            start: '09:00',
+            end: '17:00'
+          },
           created_at: new Date().toISOString()
         },
         {
@@ -137,6 +160,11 @@ class SimpleDatabase {
           bio: 'Known for the sharpest line-ups in the city, Jax specializes in modern urban cuts and intricate designs.',
           image: '/images/barbers/james-jax-jackson.jpg',
           specialties: '["Skin Fades", "Hair Tattoos", "Beard Shaping"]',
+          schedule: {
+            days: ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            start: '10:00',
+            end: '18:00'
+          },
           created_at: new Date().toISOString()
         },
         {
@@ -146,12 +174,17 @@ class SimpleDatabase {
           bio: 'Leo brings 10 years of international experience, specializing in longer men\'s hairstyles and texture management.',
           image: '/images/barbers/leo-varas.jpg',
           specialties: '["Long Hair Styling", "Texturizing", "Grey Blending"]',
+          schedule: {
+            days: ['Monday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            start: '09:00',
+            end: '16:00'
+          },
           created_at: new Date().toISOString()
         }
       ],
       bookings: [],
-       contact_messages: [],
-       messages: []
+      contact_messages: [],
+      messages: []
     };
 
     this.saveData(defaultData);
@@ -185,11 +218,36 @@ class SimpleDatabase {
     const newUser = {
       id: Math.max(...this.data.users.map(u => u.id), 0) + 1,
       ...userData,
+      saved_styles: [],
       created_at: new Date().toISOString()
     };
     this.data.users.push(newUser);
     this.saveData();
     return newUser;
+  }
+
+  addSavedStyle(userId, style) {
+    const user = this.getUserById(userId);
+    if (user) {
+      if (!user.saved_styles) user.saved_styles = [];
+      // Check if style already exists
+      if (!user.saved_styles.find(s => s.id === style.id)) {
+        user.saved_styles.push(style);
+        this.saveData();
+      }
+      return user.saved_styles;
+    }
+    return null;
+  }
+
+  removeSavedStyle(userId, styleId) {
+    const user = this.getUserById(userId);
+    if (user && user.saved_styles) {
+      user.saved_styles = user.saved_styles.filter(s => s.id !== styleId);
+      this.saveData();
+      return user.saved_styles;
+    }
+    return null;
   }
 
   // Services

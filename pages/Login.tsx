@@ -136,8 +136,8 @@ const Login: React.FC = () => {
 
 
 
-                     <div className="mt-6 text-center space-y-2">
-                        <p className="text-sm text-gray-600">
+                    <div className="mt-6 text-center space-y-2">
+                        <p className="text-sm text-gray-400">
                             Don't have an account?{' '}
                             <button
                                 onClick={() => navigate('/signup')}
@@ -148,7 +148,7 @@ const Login: React.FC = () => {
                         </p>
                         <button
                             onClick={() => navigate('/')}
-                            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                            className="text-sm text-gray-400 hover:text-gray-200 transition-colors"
                         >
                             ← Back to Home
                         </button>

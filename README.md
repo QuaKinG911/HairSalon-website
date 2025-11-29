@@ -1,108 +1,144 @@
-# Luxe Barber
+# Luxe Barber ✂️
 
-A premium men's grooming website featuring AI-powered hairstyle consultation and online booking system.
+> **Experience the Future of Grooming**
 
-## Features
+A premium, full-stack men's grooming platform that combines traditional barbering excellence with cutting-edge AI technology. Luxe Barber offers a seamless experience for customers to discover styles, book appointments, and manage their grooming journey.
 
-- **AI Face Analysis**: Upload photos for personalized hairstyle and beard recommendations based on face shape, hair type, and skin tone
-- **Online Booking**: Schedule appointments with professional barbers
-- **User Authentication**: Secure login system with role-based access (Customer, Barber, Admin)
-- **Dashboard Management**: Separate dashboards for customers, barbers, and administrators
-- **Service Catalog**: Browse available grooming services and packages
-- **Stylist Profiles**: View barber profiles and specialties
-- **Contact System**: Integrated messaging and contact forms
-- **Responsive Design**: Modern, mobile-friendly interface built with Tailwind CSS
+![Luxe Barber Banner](https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop)
 
-## Tech Stack
+## ✨ Key Features
 
-- **Frontend**: React 19 + TypeScript + Vite
-- **Backend**: Node.js + Express + JWT Authentication
-- **Database**: JSON file storage (easily replaceable with PostgreSQL/SQLite)
-- **Styling**: Tailwind CSS with custom amber color palette
-- **Icons**: Lucide React
-- **Build Tools**: Vite, PostCSS, Autoprefixer
+### 🤖 AI-Powered Style Consultation
+Unlike generic filters, our **Smart Mirror** technology uses advanced client-side computer vision (Canvas API) to analyze your unique features in real-time:
+- **Face Shape Detection**: Identifies if your face is Oval, Square, Round, Heart, or Diamond.
+- **Hair Texture Analysis**: Detects Straight, Wavy, Curly, or Coily hair patterns.
+- **Skin Tone Matching**: Recommends styles that complement your complexion.
+- **Privacy First**: All analysis happens locally in your browser. No photos are ever uploaded to a server.
 
-## Prerequisites
+### 📅 Intelligent Booking System
+- **Real-time Availability**: View barber schedules and book slots instantly.
+- **Role-Based Access**:
+    - **Customers**: Book appointments, view history, and save favorite styles.
+    - **Barbers**: Manage personal schedules, view upcoming appointments, and set availability.
+    - **Admins**: Full oversight of users, services, and shop performance.
 
-- Node.js (v16 or higher)
-- npm or yarn
+### 💼 Comprehensive Dashboards
+Dedicated portals for every user type ensure a tailored experience:
+- **Admin Dashboard**: Analytics, user management, and service catalog control.
+- **Barber Dashboard**: Appointment tracking and portfolio management.
+- **Customer Dashboard**: Style recommendations, booking management, and profile settings.
 
-## Installation
+## 🛠️ Tech Stack
 
-1. Clone the repository:
+### Frontend
+- **Framework**: [React 19](https://react.dev/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+
+### Backend
+- **Runtime**: [Node.js](https://nodejs.org/)
+- **Framework**: [Express.js](https://expressjs.com/)
+- **Authentication**: JWT (JSON Web Tokens)
+- **File Handling**: Multer
+
+### Database
+- **System**: Custom JSON-based Local Database
+- **Why?**: Zero-configuration, easy to deploy for demonstrations, and portable.
+- **Structure**: `database.json` acts as the single source of truth, managed by `server/config/database.js`.
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Node.js**: v16.0.0 or higher
+- **npm**: v7.0.0 or higher
+
+### Installation
+
+1. **Clone the repository**
    ```bash
    git clone https://github.com/QuaKinG911/HairSalon-website.git
    cd hairsalon
    ```
 
-2. Install dependencies:
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. Start the development servers:
+3. **Start the application**
+   This command runs both the React frontend and the Express backend concurrently.
    ```bash
    npm run dev:full
    ```
-   This will start both the frontend (port 3000) and backend (port 3001).
+   - Frontend: `http://localhost:5173`
+   - Backend: `http://localhost:3001`
 
-### Alternative Commands
+## 🔐 Environment Variables
 
-- **Frontend only**: `npm run dev`
-- **Backend only**: `npm run server`
-- **Build for production**: `npm run build`
-- **Preview production build**: `npm run preview`
+Create a `.env` file in the root directory (optional, defaults provided for development):
 
-## Usage
-
-### Demo Accounts
-
-- **Admin**: admin@hairsalon.com / password
-- **Barber**: barber@hairsalon.com / password
-- **Customer**: customer@example.com / password
-
-### Key Features
-
-1. **AI Style Consultation**: Navigate to `/ai-try-on` to upload a photo and receive personalized hairstyle recommendations
-2. **Booking System**: Register/login as a customer to book appointments
-3. **Admin Panel**: Login as admin to manage services, barbers, and bookings
-4. **Barber Dashboard**: Barbers can view their schedules and manage appointments
-
-## Project Structure
-
-```
-├── components/          # Reusable React components
-├── context/            # React Context providers (Auth, Booking)
-├── pages/              # Page components organized by role
-├── public/             # Static assets (images)
-├── server/             # Express backend
-│   ├── config/         # Database and email configuration
-│   ├── middleware/     # Authentication middleware
-│   ├── routes/         # API endpoints
-│   └── utils/          # Server utilities
-├── services/           # Client-side services (AI analysis)
-├── src/                # Main source files
-├── types.ts            # TypeScript type definitions
-└── constants.ts        # Application constants
+```env
+PORT=3001
+JWT_SECRET=your-super-secret-key-change-this-in-production
 ```
 
-## API Endpoints
+## 📂 Project Structure
 
-- `GET /api/services` - Get all services
-- `POST /api/bookings` - Create booking
-- `GET /api/barbers` - Get barber information
-- `POST /api/auth/login` - User authentication
-- `POST /api/contact` - Send contact message
+```
+├── src/                  # Frontend React Application
+│   ├── components/       # Reusable UI components
+│   ├── pages/            # Route components (Dashboards, Home, etc.)
+│   ├── services/         # API clients & AI Logic
+│   │   └── aiService.ts  # Client-side computer vision logic
+│   └── context/          # Global state (Auth, Theme)
+├── server/               # Backend Express Application
+│   ├── config/           # Configuration
+│   │   └── database.js   # Custom JSON database implementation
+│   ├── routes/           # API Endpoints
+│   ├── middleware/       # Auth & Error handling
+│   └── server.js         # Entry point
+├── database.json         # Local data storage
+└── public/               # Static assets
+```
 
-## Contributing
+## 🔌 API Endpoints
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and test thoroughly
-4. Commit your changes: `git commit -m 'Add feature'`
-5. Push to the branch: `git push origin feature-name`
-6. Submit a pull request
+### Authentication
+- `POST /api/auth/login` - Authenticate user and receive JWT.
+- `POST /api/auth/register` - Create a new customer account.
 
-## License
+### Services
+- `GET /api/services` - List all grooming services.
+- `GET /api/services/:id` - Get details of a specific service.
 
-This project is for educational and demonstration purposes.
+### Bookings
+- `GET /api/bookings` - Get user's bookings.
+- `POST /api/bookings` - Create a new appointment.
+- `PUT /api/bookings/:id/status` - Update booking status (Cancel/Confirm).
+
+### AI Analysis
+- *Note: The AI analysis is client-side. No API endpoint is required for face processing.*
+
+## 👥 Demo Accounts
+
+Use these credentials to explore the different roles:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@hairsalon.com` | `password` |
+| **Barber** | `marcus@hairsalon.com` | `password` |
+| **Customer** | `customer@example.com` | `password` |
+
+## 🤝 Contributing
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.

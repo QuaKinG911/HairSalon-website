@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, MailOpen, Trash2 } from 'lucide-react';
 
+import { messagesAPI, usersAPI } from '../../src/api';
+import { Message, User } from '../../types';
+
 interface ContactMessage {
     id: string;
     name: string;
@@ -9,6 +12,7 @@ interface ContactMessage {
     message: string;
     createdAt: string;
     read: boolean;
+    senderId: number;
 }
 
 const AdminMessages: React.FC = () => {
@@ -19,29 +23,54 @@ const AdminMessages: React.FC = () => {
         loadMessages();
     }, []);
 
-    const loadMessages = () => {
-        const savedMessages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-        savedMessages.sort((a: ContactMessage, b: ContactMessage) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        setMessages(savedMessages);
+    const loadMessages = async () => {
+        try {
+            const [msgs, users] = await Promise.all([
+                messagesAPI.getMyMessages(),
+                usersAPI.getAll()
+            ]);
+
+            const formattedMessages = msgs.map((m: Message) => {
+                const sender = users.find((u: User) => u.id === m.sender_id);
+                return {
+                    id: m.id,
+                    name: sender?.name || 'Unknown',
+                    email: sender?.email || 'Unknown',
+                    subject: m.subject,
+                    message: m.content,
+                    createdAt: m.created_at,
+                    read: m.read,
+                    senderId: m.sender_id
+                };
+            });
+
+            setMessages(formattedMessages);
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
     };
 
-    const markAsRead = (id: string) => {
-        const updatedMessages = messages.map(m =>
-            m.id === id ? { ...m, read: true } : m
-        );
-        setMessages(updatedMessages);
-        localStorage.setItem('contactMessages', JSON.stringify(updatedMessages));
+    const markAsRead = async (id: string) => {
+        try {
+            await messagesAPI.markAsRead(id);
+            setMessages(prev => prev.map(m =>
+                m.id === id ? { ...m, read: true } : m
+            ));
+        } catch (error) {
+            console.error('Error marking message as read:', error);
+        }
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (confirm('Are you sure you want to delete this message?')) {
-            const updatedMessages = messages.filter(m => m.id !== id);
-            setMessages(updatedMessages);
-            localStorage.setItem('contactMessages', JSON.stringify(updatedMessages));
-            if (selectedMessage?.id === id) {
-                setSelectedMessage(null);
+            try {
+                await messagesAPI.delete(id);
+                setMessages(prev => prev.filter(m => m.id !== id));
+                if (selectedMessage?.id === id) {
+                    setSelectedMessage(null);
+                }
+            } catch (error) {
+                console.error('Error deleting message:', error);
             }
         }
     };

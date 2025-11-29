@@ -81,7 +81,7 @@ const MyBookings: React.FC = () => {
                         {bookings.length === 0 ? (
                             <div className="text-center py-12">
                                 <Calendar className="mx-auto text-gray-300 mb-4" size={64} />
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">No Bookings Yet</h3>
+                                <h3 className="text-xl font-bold text-white mb-2">No Bookings Yet</h3>
                                 <p className="text-gray-400 mb-6">You haven't made any appointments yet.</p>
                                 <button
                                     onClick={() => navigate('/services')}
@@ -125,7 +125,7 @@ const MyBookings: React.FC = () => {
                                                 <Calendar className="text-gray-400 mt-1" size={18} />
                                                 <div>
                                                     <p className="text-xs text-gray-500 uppercase tracking-wider">Date & Time</p>
-                                                    <p className="font-medium text-gray-900">
+                                                    <p className="font-medium text-white">
                                                         {new Date(booking.date).toLocaleDateString()} at {booking.time}
                                                     </p>
                                                 </div>
@@ -135,7 +135,7 @@ const MyBookings: React.FC = () => {
                                                 <Package className="text-gray-400 mt-1" size={18} />
                                                 <div>
                                                     <p className="text-xs text-gray-500 uppercase tracking-wider">Services</p>
-                                                    <p className="font-medium text-gray-900">{booking.services}</p>
+                                                    <p className="font-medium text-white">{booking.services}</p>
                                                 </div>
                                             </div>
 
@@ -143,7 +143,7 @@ const MyBookings: React.FC = () => {
                                                 <CreditCard className="text-gray-400 mt-1" size={18} />
                                                 <div>
                                                     <p className="text-xs text-gray-500 uppercase tracking-wider">Payment</p>
-                                                    <p className="font-medium text-gray-900">
+                                                    <p className="font-medium text-white">
                                                         {booking.paymentMethod === 'online' ? 'Paid Online' : 'Pay in Shop'}
                                                         {booking.paymentStatus === 'paid' && (
                                                             <span className="ml-2 text-green-600 text-xs">✓ Paid</span>
@@ -156,7 +156,7 @@ const MyBookings: React.FC = () => {
                                                 <Clock className="text-gray-400 mt-1" size={18} />
                                                 <div>
                                                     <p className="text-xs text-gray-500 uppercase tracking-wider">Total</p>
-                                                    <p className="font-bold text-gray-900 text-lg">${booking.total}</p>
+                                                    <p className="font-bold text-white text-lg">${booking.total}</p>
                                                 </div>
                                             </div>
                                         </div>

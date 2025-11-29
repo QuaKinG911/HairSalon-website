@@ -75,18 +75,6 @@ const UserMenu: React.FC = () => {
         <LayoutDashboard size={18} />
         <span className="font-medium">{user.name}</span>
       </Link>
-      <Link
-        to="/messages"
-        className="relative flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-sm hover:bg-gray-200 transition-colors text-sm"
-      >
-        <Bell size={18} />
-        Messages
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-            {unreadCount}
-          </span>
-        )}
-      </Link>
       <button
         onClick={handleLogout}
         className="p-2 text-gray-400 hover:text-red-400 transition-colors"
@@ -206,7 +194,7 @@ const Layout: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Scissors size={20} className="text-amber-500" />
-                 <span className="text-xl font-serif font-bold">Luxe Barber</span>
+                <span className="text-xl font-serif font-bold">Luxe Barber</span>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Refining the modern gentleman through exceptional grooming experiences and cutting-edge technology.
@@ -215,17 +203,14 @@ const Layout: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4 text-amber-500">Location</h3>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li>123 Gentleman's Row</li>
-                <li>New York, NY 10012</li>
+                <li>Yangzhou University</li>
                 <li className="text-white mt-2">+1 (555) 123-4567</li>
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4 text-amber-500">Hours</h3>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li className="flex justify-between border-b border-gray-800 pb-1"><span>Mon - Fri</span> <span>10:00 AM - 8:00 PM</span></li>
-                <li className="flex justify-between border-b border-gray-800 pb-1 pt-1"><span>Saturday</span> <span>9:00 AM - 6:00 PM</span></li>
-                <li className="flex justify-between pt-1"><span>Sunday</span> <span>11:00 AM - 4:00 PM</span></li>
+                <li className="flex justify-between border-b border-gray-800 pb-1"><span>Everyday</span> <span>9:00 - 11:00</span></li>
               </ul>
             </div>
           </div>

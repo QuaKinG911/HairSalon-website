@@ -22,10 +22,11 @@ export const BookingProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [cart]);
 
   const addToCart = (service: Service) => {
-    // Prevent duplicates for simplicity in this demo, or allow them if quantity is needed
-    if (!cart.find((item) => item.id === service.id)) {
-      setCart((prev) => [...prev, service]);
-    }
+    setCart((prev) => {
+      // Remove existing item with same ID if present (to allow updating notes)
+      const filtered = prev.filter((item) => item.id !== service.id);
+      return [...filtered, service];
+    });
   };
 
   const removeFromCart = (serviceId: string) => {

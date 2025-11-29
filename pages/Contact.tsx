@@ -1,152 +1,191 @@
-import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Send } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { messagesAPI, usersAPI } from '../src/api';
+import { Message, User } from '../types';
+import { Send, MessageSquare, User as UserIcon } from 'lucide-react';
 
 const Contact: React.FC = () => {
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [recipients, setRecipients] = useState<User[]>([]);
+  const [selectedRecipient, setSelectedRecipient] = useState<number | null>(null);
+  const [newMessage, setNewMessage] = useState({ subject: '', content: '' });
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('sending');
+  useEffect(() => {
+    loadData();
+  }, []);
 
-    // Save message to localStorage
-    const message = {
-      id: `msg-${Date.now()}`,
-      name: formData.name,
-      email: formData.email,
-      subject: formData.subject || 'General Inquiry',
-      message: formData.message,
-      createdAt: new Date().toISOString(),
-      read: false,
-    };
-
-    const existingMessages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-    existingMessages.push(message);
-    localStorage.setItem('contactMessages', JSON.stringify(existingMessages));
-
-    setTimeout(() => {
-      setStatus('sent');
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setStatus('idle'), 3000);
-    }, 1500);
+  const loadData = async () => {
+    try {
+      const [messagesRes, usersRes] = await Promise.all([
+        messagesAPI.getMyMessages(),
+        usersAPI.getAll()
+      ]);
+      setMessages(messagesRes);
+      // Filter users to barbers and admin
+      const filteredRecipients = usersRes.filter((u: User) => u.role === 'barber' || u.role === 'admin');
+      setRecipients(filteredRecipients);
+    } catch (error: any) {
+      console.error('Error loading messages:', error);
+      if (error.message.includes('Invalid token')) {
+        // Redirect to login if token invalid
+        window.location.href = '/login';
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const sendMessage = async () => {
+    if (!selectedRecipient || !newMessage.subject || !newMessage.content) return;
+
+    try {
+      await messagesAPI.send({
+        recipientId: selectedRecipient,
+        subject: newMessage.subject,
+        content: newMessage.content
+      });
+      setNewMessage({ subject: '', content: '' });
+      loadData(); // Refresh messages
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      if (error.message.includes('Invalid token')) {
+        window.location.href = '/login';
+      }
+    }
+  };
+
+  const markAsRead = async (messageId: string) => {
+    try {
+      await messagesAPI.markAsRead(messageId);
+      loadData();
+    } catch (error: any) {
+      console.error('Error marking message as read:', error);
+      if (error.message.includes('Invalid token')) {
+        window.location.href = '/login';
+      }
+    }
+  };
+
+  const getRecipientName = (recipientId: number) => {
+    const recipient = recipients.find((r: User) => r.id === recipientId);
+    return recipient ? recipient.name : 'Unknown';
+  };
+
+  const getSenderName = (senderId: number) => {
+    const recipient = recipients.find((r: User) => r.id === senderId);
+    return recipient ? recipient.name : 'Unknown';
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-64">Loading...</div>;
+  }
+
   return (
-    <div className="bg-gray-900 min-h-screen py-16 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <div className="bg-gray-800 rounded-sm shadow-2xl overflow-hidden flex flex-col md:flex-row">
-          {/* Info Side */}
-          <div className="bg-gray-900 text-white p-12 md:w-2/5 flex flex-col justify-between relative overflow-hidden">
-            <div className="relative z-10">
-              <span className="text-amber-500 font-bold tracking-widest text-xs uppercase mb-2 block">Locate Us</span>
-              <h2 className="text-3xl font-serif font-bold mb-8">Get in Touch</h2>
-              <p className="text-gray-400 mb-10 leading-relaxed">
-                Ready for your transformation? Contact us directly or book online. Walk-ins are welcome based on availability.
-              </p>
+    <div className="min-h-screen bg-gray-900 p-6 space-y-8">
+      <div className="flex items-center gap-3 mb-8">
+        <MessageSquare size={32} className="text-amber-500" />
+        <h1 className="text-3xl font-serif font-bold text-white">Messages</h1>
+      </div>
 
-              <div className="space-y-8">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-gray-800 rounded-lg text-amber-500">
-                    <MapPin size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1 text-white">Visit The Shop</h4>
-                    <p className="text-gray-400 text-sm">123 Gentleman's Row<br />New York, NY 10012</p>
-                  </div>
-                </div>
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Send Message */}
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+          <h2 className="text-xl font-bold mb-4 text-white">Send Message</h2>
 
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-gray-800 rounded-lg text-amber-500">
-                    <Phone size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1 text-white">Call Us</h4>
-                    <p className="text-gray-400 text-sm">+1 (555) 123-4567</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-gray-800 rounded-lg text-amber-500">
-                    <Mail size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold mb-1 text-white">Email Us</h4>
-                    <p className="text-gray-400 text-sm">bookings@luxebarbers.com</p>
-                  </div>
-                </div>
-              </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">To:</label>
+              <select
+                value={selectedRecipient || ''}
+                onChange={(e) => setSelectedRecipient(parseInt(e.target.value))}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-amber-500 focus:border-transparent text-white"
+              >
+                <option value="">Select recipient</option>
+                {recipients.map(recipient => (
+                  <option key={recipient.id} value={recipient.id}>
+                    {recipient.role === 'admin' ? 'Admin Support' : `Barber: ${recipient.name}`}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Decorative Circle */}
-            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-amber-600 rounded-full opacity-10 blur-3xl"></div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Subject:</label>
+              <input
+                type="text"
+                value={newMessage.subject}
+                onChange={(e) => setNewMessage(prev => ({ ...prev, subject: e.target.value }))}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-amber-500 focus:border-transparent text-white"
+                placeholder="Message subject"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Message:</label>
+              <textarea
+                value={newMessage.content}
+                onChange={(e) => setNewMessage(prev => ({ ...prev, content: e.target.value }))}
+                rows={4}
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-amber-500 focus:border-transparent text-white"
+                placeholder="Your message"
+              />
+            </div>
+
+            <button
+              onClick={sendMessage}
+              disabled={!selectedRecipient || !newMessage.subject || !newMessage.content}
+              className="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <Send size={16} />
+              Send Message
+            </button>
           </div>
+        </div>
 
-          {/* Form Side */}
-          <div className="p-12 md:w-3/5 bg-white">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-sm border-b-2 border-gray-600 focus:border-amber-500 outline-none transition-all bg-transparent placeholder-gray-500 text-white"
-                  placeholder="John Doe"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 rounded-sm border-b-2 border-gray-600 focus:border-amber-500 outline-none transition-all bg-transparent placeholder-gray-500 text-white"
-                  placeholder="john@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Subject (Optional)</label>
-                <input
-                  type="text"
-                  value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full px-4 py-3 rounded-sm border-b-2 border-gray-600 focus:border-amber-500 outline-none transition-all bg-transparent placeholder-gray-500 text-white"
-                  placeholder="Booking inquiry"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Message</label>
-                <textarea
-                  required
-                  rows={4}
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full px-4 py-3 rounded-sm border-b-2 border-gray-600 focus:border-amber-500 outline-none transition-all bg-transparent placeholder-gray-500 text-white resize-none"
-                  placeholder="How can we help you?"
-                ></textarea>
-              </div>
+        {/* Messages List */}
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+          <h2 className="text-xl font-bold mb-4 text-white">Your Messages</h2>
 
-              <button
-                type="submit"
-                disabled={status !== 'idle'}
-                className={`w-full py-4 rounded-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${status === 'sent'
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-900 text-white hover:bg-amber-600 hover:text-black'
-                  }`}
-              >
-                {status === 'sending' ? (
-                  'Sending...'
-                ) : status === 'sent' ? (
-                  'Message Sent'
-                ) : (
-                  <>
-                    Send Message <Send size={18} />
-                  </>
-                )}
-              </button>
-            </form>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {messages.length === 0 ? (
+              <p className="text-gray-400 text-center py-8">No messages yet</p>
+            ) : (
+              messages.map(message => (
+                <div
+                  key={message.id}
+                  className={`p-4 border rounded-lg ${message.read ? 'bg-gray-700' : 'bg-amber-900/30 border-amber-600'}`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <UserIcon size={16} className="text-gray-500" />
+                      <span className="font-medium">
+                        {message.sender_id === (user?.id || 0) ? 'You' : getSenderName(message.sender_id)}
+                      </span>
+                      <span className="text-sm text-gray-400">to</span>
+                      <span className="font-medium">
+                        {message.recipient_id === (user?.id || 0) ? 'You' : getRecipientName(message.recipient_id)}
+                      </span>
+                    </div>
+                    {!message.read && message.recipient_id === (user?.id || 0) && (
+                      <button
+                        onClick={() => markAsRead(message.id)}
+                        className="text-xs bg-amber-600 text-white px-2 py-1 rounded hover:bg-amber-700"
+                      >
+                        Mark Read
+                      </button>
+                    )}
+                  </div>
+
+                  <h3 className="font-semibold text-white mb-1">{message.subject}</h3>
+                  <p className="text-gray-300 text-sm mb-2">{message.content}</p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(message.created_at).toLocaleString()}
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
