@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Calendar, Clock, Search, Package, CreditCard, User as UserIcon, Phone, Mail, MessageSquare, LayoutDashboard, ChevronRight, CheckCircle, XCircle, Save } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import Messenger from '../../components/Messenger';
 
-import { messagesAPI, usersAPI } from '../../src/api';
+import { messagesAPI, usersAPI, barbersAPI } from '../../src/api';
 import { Message, User } from '../../types';
 
 interface Booking {
@@ -106,7 +107,47 @@ const BarberDashboard: React.FC = () => {
         }
     };
 
-    const loadSchedule = () => {
+    const loadSchedule = async () => {
+        try {
+            // Try to load from API first
+            const barbers = await barbersAPI.getAll();
+            const myBarberProfile = barbers.find((b: any) => b.name === user?.name);
+
+            if (myBarberProfile && myBarberProfile.schedule) {
+                const apiSchedule = myBarberProfile.schedule;
+
+                if (apiSchedule.slots) {
+                    // Load detailed slots
+                    const loadedSchedule: ScheduleSlot[] = apiSchedule.slots.map((slot: any) => ({
+                        id: `${slot.day.toLowerCase()}-${Date.now()}-${Math.random()}`,
+                        day: slot.day,
+                        startTime: slot.startTime,
+                        endTime: slot.endTime,
+                        isActive: slot.isActive
+                    }));
+                    setSchedule(loadedSchedule);
+                    return;
+                }
+
+                // Fallback: Convert old API format { days, start, end } to Dashboard format
+                const loadedSchedule: ScheduleSlot[] = days.map(day => {
+                    const isActive = apiSchedule.days.includes(day);
+                    return {
+                        id: `${day.toLowerCase()}-${Date.now()}`,
+                        day,
+                        startTime: isActive ? apiSchedule.start : '09:00',
+                        endTime: isActive ? apiSchedule.end : '17:00',
+                        isActive
+                    };
+                });
+                setSchedule(loadedSchedule);
+                return;
+            }
+        } catch (error) {
+            console.error('Error loading schedule from API:', error);
+        }
+
+        // Fallback to local storage or default
         const savedSchedule = localStorage.getItem(`barber_schedule_${user?.id}`);
         if (savedSchedule) {
             setSchedule(JSON.parse(savedSchedule));
@@ -123,9 +164,73 @@ const BarberDashboard: React.FC = () => {
         }
     };
 
-    const saveSchedule = () => {
+    const saveSchedule = async () => {
+        try {
+            // Format schedule for API
+            // The API expects { days: string[], start: string, end: string }
+            // But our UI allows per-day schedules.
+            // For now, let's find the most common start/end time or just take the first active day's times
+            // and list all active days.
+            // A better approach would be to update the backend to support per-day schedules,
+            // but to stick to the current schema:
+
+            const activeSlots = schedule.filter(s => s.isActive);
+            const days = activeSlots.map(s => s.day);
+            const start = activeSlots.length > 0 ? activeSlots[0].startTime : '09:00';
+            const end = activeSlots.length > 0 ? activeSlots[0].endTime : '17:00';
+
+            const scheduleData = {
+                days,
+                start,
+                end,
+                slots: schedule.map(s => ({
+                    day: s.day,
+                    startTime: s.startTime,
+                    endTime: s.endTime,
+                    isActive: s.isActive
+                }))
+            };
+
+            // We need the barber's ID. Assuming the logged-in user is the barber and their ID matches the barber ID.
+            // In a real app, we'd have a link between User and Barber.
+            // For this demo, let's assume the user.id corresponds to the barber.id if the user is a barber.
+            // However, looking at the seed data:
+            // User 2 is Marcus (Barber 1)
+            // User 3 is Jax (Barber 2)
+            // User 4 is Leo (Barber 3)
+            // So User ID = Barber ID + 1.
+            // This is fragile. Let's try to find the barber by name or email if possible, or just use a mapping.
+            // Let's try to fetch the barber details first to match.
+
+            // Actually, let's just try to update the barber with ID = user.id - 1 for now as a hack,
+            // or better, let's fetch all barbers and find the one with the same name as the user.
+
+            const barbers = await barbersAPI.getAll();
+            console.log('All barbers:', barbers);
+            console.log('Current user:', user);
+            const myBarberProfile = barbers.find((b: any) => b.name === user?.name);
+            console.log('Found barber profile:', myBarberProfile);
+
+            if (myBarberProfile) {
+                console.log('Updating barber schedule...', myBarberProfile.id, scheduleData);
+                await barbersAPI.update(myBarberProfile.id, {
+                    ...myBarberProfile,
+                    schedule: scheduleData
+                });
+                console.log('Schedule updated successfully');
+                setScheduleMessage('Schedule saved successfully!');
+            } else {
+                console.error('Barber profile not found for user:', user?.name);
+                setScheduleMessage('Error: Barber profile not found.');
+            }
+        } catch (error) {
+            console.error('Error saving schedule:', error);
+            setScheduleMessage('Failed to save schedule.');
+        }
+
+        // Keep local storage sync for backup/offline (optional, but good for now)
         localStorage.setItem(`barber_schedule_${user?.id}`, JSON.stringify(schedule));
-        setScheduleMessage('Schedule saved successfully!');
+
         setIsEditingSchedule(false);
         setTimeout(() => setScheduleMessage(''), 3000);
     };
@@ -641,83 +746,7 @@ const BarberDashboard: React.FC = () => {
 
                 {/* MESSAGES TAB */}
                 {activeTab === 'messages' && (
-                    <div className="bg-gray-800 rounded-sm border border-gray-700 shadow-lg overflow-hidden h-[600px] flex">
-                        {/* Messages List */}
-                        <div className="w-1/3 border-r border-gray-700 overflow-y-auto">
-                            {messages.length === 0 ? (
-                                <div className="p-8 text-center text-gray-500">
-                                    <Mail size={48} className="mx-auto mb-4 text-gray-600" />
-                                    <p>No messages yet</p>
-                                </div>
-                            ) : (
-                                <div>
-                                    {messages.map(message => (
-                                        <button
-                                            key={message.id}
-                                            onClick={() => handleSelectMessage(message)}
-                                            className={`w-full text-left p-4 border-b border-gray-700 hover:bg-gray-700 transition-colors ${selectedMessage?.id === message.id ? 'bg-gray-700' : ''
-                                                } ${!message.read ? 'bg-amber-900/10 border-l-4 border-l-amber-500' : ''}`}
-                                        >
-                                            <div className="flex items-start justify-between mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    {!message.read && (
-                                                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                                                    )}
-                                                    <span className={`font-bold text-sm ${!message.read ? 'text-white' : 'text-gray-400'}`}>
-                                                        {message.name}
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs text-gray-500">
-                                                    {new Date(message.createdAt).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm font-medium text-gray-300 mb-1 truncate">{message.subject}</p>
-                                            <p className="text-xs text-gray-500 truncate">{message.message}</p>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Message Detail */}
-                        <div className="w-2/3 p-8 overflow-y-auto bg-gray-900/50">
-                            {selectedMessage ? (
-                                <div>
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div>
-                                            <h2 className="text-2xl font-bold font-serif text-white mb-2">{selectedMessage.subject}</h2>
-                                            <p className="text-sm text-gray-400">
-                                                From: <strong className="text-gray-200">{selectedMessage.name}</strong> ({selectedMessage.email})
-                                            </p>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                {new Date(selectedMessage.createdAt).toLocaleString()}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-gray-800 rounded-sm p-6 border border-gray-700 mb-6">
-                                        <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">{selectedMessage.message}</p>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <a
-                                            href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject}`}
-                                            className="px-6 py-3 bg-amber-600 text-black rounded-sm font-bold hover:bg-amber-500 transition-colors uppercase tracking-wide text-sm"
-                                        >
-                                            Reply via Email
-                                        </a>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="h-full flex items-center justify-center text-gray-500">
-                                    <div className="text-center">
-                                        <MessageSquare size={64} className="mx-auto mb-4 opacity-50" />
-                                        <p>Select a message to view</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <Messenger className="h-[600px]" />
                 )}
             </main>
         </div>

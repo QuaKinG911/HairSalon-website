@@ -180,8 +180,8 @@ const Booking: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen py-12 px-4">
-      <div>
+    <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Progress Steps */}
         {step < 3 && (
           <div className="flex justify-center mb-12">

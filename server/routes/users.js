@@ -12,7 +12,7 @@ router.post('/register', async (req, res) => {
     const { email, password, name, phone } = req.body;
 
     // Check if user already exists
-    const existingUser = db.getUserByEmail(email);
+    const existingUser = await db.getUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create new user
-    const user = db.createUser({
+    const user = await db.createUser({
       email,
       password: hashedPassword,
       role: 'customer',
@@ -57,7 +57,7 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     // Find user
-    const user = db.getUserByEmail(email);
+    const user = await db.getUserByEmail(email);
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -105,12 +105,13 @@ router.get('/validate', authenticateToken, async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     console.log('Getting all users');
-    const users = db.getUsers().map(user => {
+    const users = await db.getUsers();
+    const safeUsers = users.map(user => {
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     });
-    console.log('Returning', users.length, 'users');
-    res.json(users);
+    console.log('Returning', safeUsers.length, 'users');
+    res.json(safeUsers);
   } catch (error) {
     console.error('Get users error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -121,7 +122,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const user = db.getUserById(id);
+    const user = await db.getUserById(id);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -141,7 +142,7 @@ router.post('/:id/saved-styles', async (req, res) => {
     const { id } = req.params;
     const { style } = req.body;
 
-    const savedStyles = db.addSavedStyle(id, style);
+    const savedStyles = await db.addSavedStyle(id, style);
 
     if (!savedStyles) {
       return res.status(404).json({ error: 'User not found' });
@@ -159,7 +160,7 @@ router.delete('/:id/saved-styles/:styleId', async (req, res) => {
   try {
     const { id, styleId } = req.params;
 
-    const savedStyles = db.removeSavedStyle(id, styleId);
+    const savedStyles = await db.removeSavedStyle(id, styleId);
 
     if (!savedStyles) {
       return res.status(404).json({ error: 'User not found' });

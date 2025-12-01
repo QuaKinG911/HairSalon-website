@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, CreditCard, Package, Copy } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
+import { bookingsAPI } from '../../src/api';
+
 interface Booking {
     id: string;
     bookingNumber: string;
@@ -23,19 +25,47 @@ const MyBookings: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Load bookings from localStorage
-        const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-        // Filter bookings for current user
-        const userBookings = allBookings.filter((b: Booking) =>
-            b.customerEmail === user?.email
-        );
-        // Sort by date (newest first)
-        userBookings.sort((a: Booking, b: Booking) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        setBookings(userBookings);
+        const fetchBookings = async () => {
+            if (!user) return;
+
+            try {
+                setIsLoading(true);
+                const data = await bookingsAPI.getByCustomer(user.id.toString());
+
+                // Map API response (snake_case) to frontend interface (camelCase)
+                const mappedBookings = data.map((b: any) => ({
+                    id: b.id.toString(),
+                    bookingNumber: b.booking_number,
+                    customerName: b.customer_name,
+                    customerEmail: b.customer_email,
+                    customerPhone: b.customer_phone,
+                    services: Array.isArray(b.services) ? b.services.join(', ') : b.services,
+                    date: b.date,
+                    time: b.time,
+                    paymentMethod: b.payment_method,
+                    paymentStatus: b.payment_status,
+                    status: b.status,
+                    total: b.total,
+                    createdAt: b.created_at
+                }));
+
+                // Sort by date (newest first)
+                mappedBookings.sort((a: Booking, b: Booking) =>
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                );
+
+                setBookings(mappedBookings);
+            } catch (error) {
+                console.error('Error fetching bookings:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchBookings();
     }, [user]);
 
     const copyBookingNumber = (number: string) => {
@@ -57,8 +87,8 @@ const MyBookings: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 py-12 px-4">
-            <div className="max-w-5xl mx-auto">
+        <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <button
                     onClick={() => navigate('/')}
                     className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
@@ -78,7 +108,11 @@ const MyBookings: React.FC = () => {
                     </div>
 
                     <div className="p-8">
-                        {bookings.length === 0 ? (
+                        {isLoading ? (
+                            <div className="flex justify-center items-center py-12">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
+                            </div>
+                        ) : bookings.length === 0 ? (
                             <div className="text-center py-12">
                                 <Calendar className="mx-auto text-gray-300 mb-4" size={64} />
                                 <h3 className="text-xl font-bold text-white mb-2">No Bookings Yet</h3>
@@ -162,8 +196,25 @@ const MyBookings: React.FC = () => {
                                         </div>
 
                                         {booking.status === 'pending' && (
-                                            <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-800">
-                                                <strong>Reminder:</strong> Please arrive 10 minutes early and bring your booking number.
+                                            <div className="mt-4 flex justify-between items-center bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-800">
+                                                <span><strong>Reminder:</strong> Please arrive 10 minutes early.</span>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (window.confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+                                                            try {
+                                                                await bookingsAPI.delete(booking.id);
+                                                                setBookings(prev => prev.filter(b => b.id !== booking.id));
+                                                                alert('Booking cancelled successfully.');
+                                                            } catch (error) {
+                                                                console.error('Error cancelling booking:', error);
+                                                                alert('Failed to cancel booking.');
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-xs font-bold uppercase tracking-wider"
+                                                >
+                                                    Cancel Booking
+                                                </button>
                                             </div>
                                         )}
                                     </div>

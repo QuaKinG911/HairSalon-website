@@ -9,8 +9,8 @@ const Services: React.FC = () => {
 
   const categories = ['All', 'Haircuts', 'Beard & Shave', 'Grooming', 'Packages'];
 
-  const filteredServices = filter === 'All' 
-    ? SERVICES 
+  const filteredServices = filter === 'All'
+    ? SERVICES
     : SERVICES.filter(service => service.category === filter);
 
   const isInCart = (id: string) => cart.some(item => item.id === id);
@@ -31,11 +31,10 @@ const Services: React.FC = () => {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-8 py-3 rounded-sm text-sm font-bold tracking-wider uppercase transition-all ${
-                filter === cat
-                  ? 'bg-gray-900 text-amber-500 border border-gray-700'
-                  : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
-              }`}
+              className={`px-8 py-3 rounded-sm text-sm font-bold tracking-wider uppercase transition-all ${filter === cat
+                ? 'bg-gray-900 text-amber-500 border border-gray-700'
+                : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
+                }`}
             >
               {cat}
             </button>
@@ -45,7 +44,7 @@ const Services: React.FC = () => {
         {/* Services Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
           {filteredServices.map((service) => (
-            <div key={service.id} className="bg-gray-800 rounded-sm overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group">
+            <div key={service.id} className="bg-gray-800 rounded-sm overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
               <div className="h-64 overflow-hidden relative">
                 <img
                   src={service.image}
@@ -54,35 +53,38 @@ const Services: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
                 <span className="absolute bottom-4 left-4 text-white text-xs font-bold uppercase tracking-wider bg-amber-600 px-3 py-1 rounded-sm">
-                    {service.category}
+                  {service.category}
                 </span>
               </div>
-              <div className="p-8 flex flex-col h-auto">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-xl font-bold text-white font-serif">{service.name}</h3>
+              <div className="p-8 flex flex-col flex-1">
+                <div className="mb-3 flex justify-between items-start">
+                  <h3 className="text-xl font-bold text-white font-serif w-2/3">{service.name}</h3>
                   <span className="text-xl font-bold text-amber-600">${service.price}</span>
                 </div>
-                <p className="text-gray-400 text-sm mb-8 leading-relaxed">{service.description}</p>
-                
-                <button
-                  onClick={() => addToCart(service)}
-                  disabled={isInCart(service.id)}
-                  className={`w-full py-4 rounded-sm font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all ${
-                    isInCart(service.id)
+                <div className="mb-6">
+                  <p className="text-gray-400 text-sm leading-relaxed">{service.description}</p>
+                </div>
+
+                <div className="mt-auto">
+                  <button
+                    onClick={() => addToCart(service)}
+                    disabled={isInCart(service.id)}
+                    className={`w-full py-4 rounded-sm font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all ${isInCart(service.id)
                       ? 'bg-gray-700 text-gray-400 cursor-default'
                       : 'bg-gray-900 text-white hover:bg-amber-600 hover:text-black'
-                  }`}
-                >
-                  {isInCart(service.id) ? (
-                    <>
-                      <Check size={16} /> Selected
-                    </>
-                  ) : (
-                    <>
-                      <Plus size={16} /> Book Service
-                    </>
-                  )}
-                </button>
+                      }`}
+                  >
+                    {isInCart(service.id) ? (
+                      <>
+                        <Check size={16} /> Selected
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={16} /> Book Service
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           ))}

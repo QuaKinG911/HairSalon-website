@@ -6,7 +6,7 @@ const router = express.Router();
 // Get all barbers
 router.get('/', async (req, res) => {
   try {
-    const barbers = db.getBarbers();
+    const barbers = await db.getBarbers();
     res.json(barbers);
   } catch (error) {
     console.error('Get barbers error:', error);
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const barber = db.getBarberById(id);
+    const barber = await db.getBarberById(id);
 
     if (!barber) {
       return res.status(404).json({ error: 'Barber not found' });
@@ -36,12 +36,12 @@ router.post('/', async (req, res) => {
   try {
     const { name, role, bio, image, specialties } = req.body;
 
-    const barber = db.createBarber({
+    const barber = await db.createBarber({
       name,
       role: role || 'Barber',
       bio,
       image,
-      specialties: JSON.stringify(specialties)
+      specialties: specialties // passed as array/object, handled in db adapter
     });
 
     res.status(201).json(barber);
@@ -55,14 +55,17 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, role, bio, image, specialties } = req.body;
+    console.log(`Updating barber ${id}...`);
+    const { name, role, bio, image, specialties, schedule } = req.body;
+    console.log('Update data:', { name, role, bio, image, specialties, schedule });
 
-    const barber = db.updateBarber(id, {
+    const barber = await db.updateBarber(id, {
       name,
       role,
       bio,
       image,
-      specialties: JSON.stringify(specialties)
+      specialties: specialties, // passed as array/object
+      schedule: schedule
     });
 
     if (!barber) {
@@ -80,7 +83,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const barber = db.deleteBarber(id);
+    const barber = await db.deleteBarber(id);
 
     if (!barber) {
       return res.status(404).json({ error: 'Barber not found' });

@@ -6,7 +6,7 @@ const router = express.Router();
 // Get all services
 router.get('/', async (req, res) => {
   try {
-    const services = db.getServices();
+    const services = await db.getServices();
     res.json(services);
   } catch (error) {
     console.error('Get services error:', error);
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const service = db.getServiceById(id);
+    const service = await db.getServiceById(id);
 
     if (!service) {
       return res.status(404).json({ error: 'Service not found' });
@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
   try {
     const { name, description, price, category, image, duration } = req.body;
 
-    const service = db.createService({
+    const service = await db.createService({
       name,
       description,
       price,
@@ -58,7 +58,7 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { name, description, price, category, image, duration } = req.body;
 
-    const service = db.updateService(id, {
+    const service = await db.updateService(id, {
       name,
       description,
       price,
@@ -82,7 +82,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const service = db.deleteService(id);
+    const service = await db.deleteService(id);
 
     if (!service) {
       return res.status(404).json({ error: 'Service not found' });

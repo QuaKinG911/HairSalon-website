@@ -6,7 +6,7 @@ const router = express.Router();
 // Get all contact messages (admin only)
 router.get('/', async (req, res) => {
   try {
-    const messages = db.getContactMessages();
+    const messages = await db.getContactMessages();
     res.json(messages);
   } catch (error) {
     console.error('Get contact messages error:', error);
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const message = db.getContactMessageById(id);
+    const message = await db.getContactMessageById(id);
 
     if (!message) {
       return res.status(404).json({ error: 'Contact message not found' });
@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
   try {
     const { name, email, phone, subject, message } = req.body;
 
-    const newMessage = db.createContactMessage({
+    const newMessage = await db.createContactMessage({
       name,
       email,
       phone,
@@ -55,7 +55,7 @@ router.post('/', async (req, res) => {
 router.put('/:id/read', async (req, res) => {
   try {
     const { id } = req.params;
-    const message = db.markMessageAsRead(id);
+    const message = await db.markContactMessageAsRead(id);
 
     if (!message) {
       return res.status(404).json({ error: 'Contact message not found' });
@@ -72,7 +72,7 @@ router.put('/:id/read', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const message = db.deleteContactMessage(id);
+    const message = await db.deleteContactMessage(id);
 
     if (!message) {
       return res.status(404).json({ error: 'Contact message not found' });

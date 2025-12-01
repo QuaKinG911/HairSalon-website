@@ -1,478 +1,582 @@
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import bcrypt from 'bcryptjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Simple JSON-based database for development
-class SimpleDatabase {
+class SqliteDatabase {
   constructor() {
-    this.dataFile = path.join(__dirname, '../../database.json');
-    this.data = this.loadData();
+    this.dbPath = path.join(__dirname, '../../hairsalon.db');
+    this.jsonDbPath = path.join(__dirname, '../../database.json');
+    this.db = null;
+    this.initPromise = this.initialize();
   }
 
-  loadData() {
+  async initialize() {
     try {
-      console.log('Loading database from:', this.dataFile);
-      if (fs.existsSync(this.dataFile)) {
-        console.log('Database file exists, reading...');
-        const data = fs.readFileSync(this.dataFile, 'utf8');
-        return JSON.parse(data);
-      } else {
-        console.log('Database file does not exist, will create default data');
+      this.db = await open({
+        filename: this.dbPath,
+        driver: sqlite3.Database
+      });
+
+      console.log('Connected to SQLite database');
+
+      await this.createTables();
+      await this.migrateDataIfNeeded();
+
+      return this.db;
+    } catch (error) {
+      console.error('Database initialization error:', error);
+    }
+  }
+
+  async createTables() {
+    // Users
+    await this.db.exec(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'customer',
+        name TEXT NOT NULL,
+        phone TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Saved Styles (Many-to-Many relationship for users and styles/images)
+    await this.db.exec(`
+      CREATE TABLE IF NOT EXISTS user_saved_styles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        style_data TEXT, -- JSON string of the style object
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )
+    `);
+
+    // Services
+    await this.db.exec(`
+      CREATE TABLE IF NOT EXISTS services (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT,
+        price DECIMAL(10,2) NOT NULL,
+        category TEXT NOT NULL,
+        image TEXT,
+        duration TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Barbers
+    await this.db.exec(`
+      CREATE TABLE IF NOT EXISTS barbers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'Barber',
+        bio TEXT,
+        image TEXT,
+        specialties TEXT, -- JSON string
+        schedule TEXT, -- JSON string
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Bookings
+    await this.db.exec(`
+      CREATE TABLE IF NOT EXISTS bookings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        booking_number TEXT UNIQUE,
+        customer_id INTEGER,
+        customer_name TEXT NOT NULL,
+        customer_email TEXT NOT NULL,
+        customer_phone TEXT,
+        barber_id INTEGER,
+        barber_name TEXT,
+        services TEXT NOT NULL, -- JSON string
+        date DATE NOT NULL,
+        time TIME NOT NULL,
+        payment_method TEXT DEFAULT 'online',
+        payment_status TEXT DEFAULT 'pending',
+        status TEXT DEFAULT 'pending',
+        total DECIMAL(10,2) NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(customer_id) REFERENCES users(id),
+        FOREIGN KEY(barber_id) REFERENCES barbers(id)
+      )
+    `);
+
+    // Contact Messages
+    await this.db.exec(`
+      CREATE TABLE IF NOT EXISTS contact_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT,
+        subject TEXT,
+        message TEXT NOT NULL,
+        read BOOLEAN DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Messages (Internal messaging)
+    await this.db.exec(`
+      CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender_id INTEGER,
+        recipient_id INTEGER,
+        content TEXT NOT NULL,
+        read BOOLEAN DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(sender_id) REFERENCES users(id),
+        FOREIGN KEY(recipient_id) REFERENCES users(id)
+      )
+    `);
+  }
+
+  async migrateDataIfNeeded() {
+    const userCount = await this.db.get('SELECT COUNT(*) as count FROM users');
+    if (userCount.count > 0) {
+      console.log('Database already contains data, skipping migration');
+      return;
+    }
+
+    if (fs.existsSync(this.jsonDbPath)) {
+      console.log('Migrating data from database.json...');
+      try {
+        const data = JSON.parse(fs.readFileSync(this.jsonDbPath, 'utf8'));
+
+        // Migrate Users
+        if (data.users) {
+          for (const user of data.users) {
+            await this.db.run(
+              `INSERT INTO users (id, email, password, role, name, phone, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              [user.id, user.email, user.password, user.role, user.name, user.phone, user.created_at]
+            );
+
+            if (user.saved_styles && Array.isArray(user.saved_styles)) {
+              for (const style of user.saved_styles) {
+                await this.db.run(
+                  `INSERT INTO user_saved_styles (user_id, style_data) VALUES (?, ?)`,
+                  [user.id, JSON.stringify(style)]
+                );
+              }
+            }
+          }
+        }
+
+        // Migrate Services
+        if (data.services) {
+          for (const service of data.services) {
+            await this.db.run(
+              `INSERT INTO services (id, name, description, price, category, image, duration, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              [service.id, service.name, service.description, service.price, service.category, service.image, service.duration, service.created_at]
+            );
+          }
+        }
+
+        // Migrate Barbers
+        if (data.barbers) {
+          for (const barber of data.barbers) {
+            await this.db.run(
+              `INSERT INTO barbers (id, name, role, bio, image, specialties, schedule, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              [barber.id, barber.name, barber.role, barber.bio, barber.image, barber.specialties, JSON.stringify(barber.schedule), barber.created_at]
+            );
+          }
+        }
+
+        // Migrate Bookings
+        if (data.bookings) {
+          for (const booking of data.bookings) {
+            await this.db.run(
+              `INSERT INTO bookings (id, booking_number, customer_id, customer_name, customer_email, customer_phone, barber_id, barber_name, services, date, time, payment_method, payment_status, status, total, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [booking.id, booking.booking_number || null, booking.customer_id, booking.customer_name, booking.customer_email, booking.customer_phone, booking.barber_id, booking.barber_name, JSON.stringify(booking.services), booking.date, booking.time, booking.payment_method, booking.payment_status, booking.status, booking.total, booking.created_at]
+            );
+          }
+        }
+
+        // Migrate Contact Messages
+        if (data.contact_messages) {
+          for (const msg of data.contact_messages) {
+            await this.db.run(
+              `INSERT INTO contact_messages (id, name, email, phone, subject, message, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              [msg.id, msg.name, msg.email, msg.phone, msg.subject, msg.message, msg.read ? 1 : 0, msg.created_at]
+            );
+          }
+        }
+
+        // Migrate Messages
+        if (data.messages) {
+          for (const msg of data.messages) {
+            await this.db.run(
+              `INSERT INTO messages (id, sender_id, recipient_id, content, read, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+              [msg.id, msg.sender_id, msg.recipient_id, msg.content, msg.read ? 1 : 0, msg.created_at]
+            );
+          }
+        }
+
+        console.log('Migration completed successfully');
+      } catch (error) {
+        console.error('Migration failed:', error);
       }
-    } catch (error) {
-      console.error('Error loading database:', error);
     }
-
-    // Initialize with default data
-    const defaultData = {
-      users: [
-        {
-          id: 1,
-          email: 'admin@hairsalon.com',
-          password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
-          role: 'admin',
-          name: 'Admin User',
-          phone: null,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 2,
-          email: 'marcus@hairsalon.com',
-          password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
-          role: 'barber',
-          name: 'Marcus Thorne',
-          phone: '+1234567890',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 3,
-          email: 'jax@hairsalon.com',
-          password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
-          role: 'barber',
-          name: 'James "Jax" Jackson',
-          phone: '+1234567891',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 4,
-          email: 'leo@hairsalon.com',
-          password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
-          role: 'barber',
-          name: 'Leo Varas',
-          phone: '+1234567892',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 5,
-          email: 'customer@example.com',
-          password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password
-          role: 'customer',
-          name: 'Jane Customer',
-          phone: '+0987654321',
-          created_at: new Date().toISOString()
-        }
-      ],
-      services: [
-        {
-          id: 1,
-          name: 'The Executive Cut',
-          description: 'Precision scissor cut tailored to your head shape, finished with a straight razor neck shave and style.',
-          price: 45.00,
-          category: 'Haircuts',
-          image: '/images/services/TheExecutiveCut.jpg',
-          duration: '45 minutes',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 2,
-          name: 'Skin Mask',
-          description: 'Rejuvenating facial treatment with deep cleansing mask, exfoliation, and moisturizing therapy.',
-          price: 50.00,
-          category: 'Grooming',
-          image: '/images/services/FaceMask.jpg',
-          duration: '30 minutes',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 3,
-          name: 'Traditional Hot Towel Shave',
-          description: 'A relaxing straight razor shave with hot towel treatment, essential oils, and post-shave balm.',
-          price: 55.00,
-          category: 'Beard & Shave',
-          image: '/images/services/TraditionalHotTowelShave.jpg',
-          duration: '45 minutes',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 4,
-          name: 'Beard Sculpt & Trim',
-          description: 'Expert shaping of the beard and mustache with razor lining and conditioning oil.',
-          price: 35.00,
-          category: 'Beard & Shave',
-          image: '/images/services/BeardSculpt&Trim.jpg',
-          duration: '30 minutes',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 5,
-          name: 'The Gentleman\'s Package',
-          description: 'Our signature haircut combined with a hot towel shave or beard sculpt. The ultimate grooming experience.',
-          price: 90.00,
-          category: 'Packages',
-          image: '/images/services/TheGentlemanPackage.jpg',
-          duration: '90 minutes',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 6,
-          name: 'Scalp Treatment & Massage',
-          description: 'Exfoliating scalp therapy to promote hair health, accompanied by a 15-minute head massage.',
-          price: 40.00,
-          category: 'Grooming',
-          image: '/images/services/ScalpTreatment&Massageman.jpg',
-          duration: '45 minutes',
-          created_at: new Date().toISOString()
-        }
-      ],
-      barbers: [
-        {
-          id: 1,
-          name: 'Marcus Thorne',
-          role: 'Master Barber',
-          bio: 'Marcus blends old-school barbering techniques with modern styling to create timeless looks for the modern gentleman.',
-          image: '/images/barbers/marcus-thorne.jpg',
-          specialties: '["Hot Towel Shaves", "Precision Shear Work", "Classic Pompadours"]',
-          schedule: {
-            days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-            start: '09:00',
-            end: '17:00'
-          },
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 2,
-          name: 'James "Jax" Jackson',
-          role: 'Fade Specialist',
-          bio: 'Known for the sharpest line-ups in the city, Jax specializes in modern urban cuts and intricate designs.',
-          image: '/images/barbers/james-jax-jackson.jpg',
-          specialties: '["Skin Fades", "Hair Tattoos", "Beard Shaping"]',
-          schedule: {
-            days: ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-            start: '10:00',
-            end: '18:00'
-          },
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 3,
-          name: 'Leo Varas',
-          role: 'Senior Stylist',
-          bio: 'Leo brings 10 years of international experience, specializing in longer men\'s hairstyles and texture management.',
-          image: '/images/barbers/leo-varas.jpg',
-          specialties: '["Long Hair Styling", "Texturizing", "Grey Blending"]',
-          schedule: {
-            days: ['Monday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-            start: '09:00',
-            end: '16:00'
-          },
-          created_at: new Date().toISOString()
-        }
-      ],
-      bookings: [],
-      contact_messages: [],
-      messages: []
-    };
-
-    this.saveData(defaultData);
-    return defaultData;
   }
 
-  saveData(data = this.data) {
-    try {
-      console.log('Saving database to:', this.dataFile);
-      fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2));
-      console.log('Database saved successfully');
-    } catch (error) {
-      console.error('Error saving database:', error);
+  async ensureInitialized() {
+    if (!this.db) {
+      await this.initPromise;
     }
+    return this.db;
   }
 
   // Users
-  getUsers() {
-    return this.data.users;
+  async getUsers() {
+    const db = await this.ensureInitialized();
+    return await db.all('SELECT * FROM users');
   }
 
-  getUserById(id) {
-    return this.data.users.find(user => user.id === parseInt(id));
-  }
-
-  getUserByEmail(email) {
-    return this.data.users.find(user => user.email === email);
-  }
-
-  createUser(userData) {
-    const newUser = {
-      id: Math.max(...this.data.users.map(u => u.id), 0) + 1,
-      ...userData,
-      saved_styles: [],
-      created_at: new Date().toISOString()
-    };
-    this.data.users.push(newUser);
-    this.saveData();
-    return newUser;
-  }
-
-  addSavedStyle(userId, style) {
-    const user = this.getUserById(userId);
+  async getUserById(id) {
+    const db = await this.ensureInitialized();
+    const user = await db.get('SELECT * FROM users WHERE id = ?', id);
     if (user) {
-      if (!user.saved_styles) user.saved_styles = [];
-      // Check if style already exists
-      if (!user.saved_styles.find(s => s.id === style.id)) {
-        user.saved_styles.push(style);
-        this.saveData();
-      }
-      return user.saved_styles;
+      const savedStyles = await db.all('SELECT style_data FROM user_saved_styles WHERE user_id = ?', id);
+      user.saved_styles = savedStyles.map(s => JSON.parse(s.style_data));
     }
-    return null;
+    return user;
   }
 
-  removeSavedStyle(userId, styleId) {
-    const user = this.getUserById(userId);
-    if (user && user.saved_styles) {
-      user.saved_styles = user.saved_styles.filter(s => s.id !== styleId);
-      this.saveData();
-      return user.saved_styles;
+  async getUserByEmail(email) {
+    const db = await this.ensureInitialized();
+    const user = await db.get('SELECT * FROM users WHERE email = ?', email);
+    if (user) {
+      const savedStyles = await db.all('SELECT style_data FROM user_saved_styles WHERE user_id = ?', user.id);
+      user.saved_styles = savedStyles.map(s => JSON.parse(s.style_data));
     }
-    return null;
+    return user;
+  }
+
+  async createUser(userData) {
+    const db = await this.ensureInitialized();
+    const { email, password, role, name, phone } = userData;
+    const result = await db.run(
+      'INSERT INTO users (email, password, role, name, phone) VALUES (?, ?, ?, ?, ?)',
+      [email, password, role, name, phone]
+    );
+    return this.getUserById(result.lastID);
+  }
+
+  async addSavedStyle(userId, style) {
+    const db = await this.ensureInitialized();
+    const currentStyles = await db.all('SELECT style_data FROM user_saved_styles WHERE user_id = ?', userId);
+    const exists = currentStyles.some(s => {
+      const parsed = JSON.parse(s.style_data);
+      return parsed.id === style.id;
+    });
+
+    if (!exists) {
+      await db.run(
+        'INSERT INTO user_saved_styles (user_id, style_data) VALUES (?, ?)',
+        [userId, JSON.stringify(style)]
+      );
+    }
+
+    return (await this.getUserById(userId)).saved_styles;
+  }
+
+  async removeSavedStyle(userId, styleId) {
+    const db = await this.ensureInitialized();
+    const rows = await db.all('SELECT id, style_data FROM user_saved_styles WHERE user_id = ?', userId);
+    for (const row of rows) {
+      const style = JSON.parse(row.style_data);
+      if (style.id === parseInt(styleId) || style.id === styleId) {
+        await db.run('DELETE FROM user_saved_styles WHERE id = ?', row.id);
+      }
+    }
+
+    return (await this.getUserById(userId)).saved_styles;
   }
 
   // Services
-  getServices() {
-    return this.data.services;
+  async getServices() {
+    const db = await this.ensureInitialized();
+    return await db.all('SELECT * FROM services');
   }
 
-  getServiceById(id) {
-    return this.data.services.find(service => service.id === parseInt(id));
+  async getServiceById(id) {
+    const db = await this.ensureInitialized();
+    return await db.get('SELECT * FROM services WHERE id = ?', id);
   }
 
-  createService(serviceData) {
-    const newService = {
-      id: Math.max(...this.data.services.map(s => s.id), 0) + 1,
-      ...serviceData,
-      created_at: new Date().toISOString()
-    };
-    this.data.services.push(newService);
-    this.saveData();
-    return newService;
+  async createService(serviceData) {
+    const db = await this.ensureInitialized();
+    const { name, description, price, category, image, duration } = serviceData;
+    const result = await db.run(
+      'INSERT INTO services (name, description, price, category, image, duration) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, description, price, category, image, duration]
+    );
+    return this.getServiceById(result.lastID);
   }
 
-  updateService(id, serviceData) {
-    const index = this.data.services.findIndex(service => service.id === parseInt(id));
-    if (index !== -1) {
-      this.data.services[index] = { ...this.data.services[index], ...serviceData, updated_at: new Date().toISOString() };
-      this.saveData();
-      return this.data.services[index];
+  async updateService(id, serviceData) {
+    const db = await this.ensureInitialized();
+    const fields = [];
+    const values = [];
+    for (const [key, value] of Object.entries(serviceData)) {
+      fields.push(`${key} = ?`);
+      values.push(value);
     }
-    return null;
+    values.push(id);
+
+    await db.run(
+      `UPDATE services SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+      values
+    );
+    return this.getServiceById(id);
   }
 
-  deleteService(id) {
-    const index = this.data.services.findIndex(service => service.id === parseInt(id));
-    if (index !== -1) {
-      const deleted = this.data.services.splice(index, 1)[0];
-      this.saveData();
-      return deleted;
+  async deleteService(id) {
+    const db = await this.ensureInitialized();
+    const service = await this.getServiceById(id);
+    if (service) {
+      await db.run('DELETE FROM services WHERE id = ?', id);
     }
-    return null;
+    return service;
   }
 
   // Barbers
-  getBarbers() {
-    return this.data.barbers;
+  async getBarbers() {
+    const db = await this.ensureInitialized();
+    const barbers = await db.all('SELECT * FROM barbers');
+    return barbers.map(b => ({
+      ...b,
+      specialties: b.specialties ? JSON.parse(b.specialties) : [],
+      schedule: b.schedule ? JSON.parse(b.schedule) : null
+    }));
   }
 
-  getBarberById(id) {
-    return this.data.barbers.find(barber => barber.id === parseInt(id));
-  }
-
-  createBarber(barberData) {
-    const newBarber = {
-      id: Math.max(...this.data.barbers.map(b => b.id), 0) + 1,
-      ...barberData,
-      created_at: new Date().toISOString()
-    };
-    this.data.barbers.push(newBarber);
-    this.saveData();
-    return newBarber;
-  }
-
-  updateBarber(id, barberData) {
-    const index = this.data.barbers.findIndex(barber => barber.id === parseInt(id));
-    if (index !== -1) {
-      this.data.barbers[index] = { ...this.data.barbers[index], ...barberData, updated_at: new Date().toISOString() };
-      this.saveData();
-      return this.data.barbers[index];
+  async getBarberById(id) {
+    const db = await this.ensureInitialized();
+    const barber = await db.get('SELECT * FROM barbers WHERE id = ?', id);
+    if (barber) {
+      barber.specialties = barber.specialties ? JSON.parse(barber.specialties) : [];
+      barber.schedule = barber.schedule ? JSON.parse(barber.schedule) : null;
     }
-    return null;
+    return barber;
   }
 
-  deleteBarber(id) {
-    const index = this.data.barbers.findIndex(barber => barber.id === parseInt(id));
-    if (index !== -1) {
-      const deleted = this.data.barbers.splice(index, 1)[0];
-      this.saveData();
-      return deleted;
+  async createBarber(barberData) {
+    const db = await this.ensureInitialized();
+    const { name, role, bio, image, specialties, schedule } = barberData;
+    const result = await db.run(
+      'INSERT INTO barbers (name, role, bio, image, specialties, schedule) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, role, bio, image, JSON.stringify(specialties), JSON.stringify(schedule)]
+    );
+    return this.getBarberById(result.lastID);
+  }
+
+  async updateBarber(id, barberData) {
+    const db = await this.ensureInitialized();
+    const fields = [];
+    const values = [];
+    for (const [key, value] of Object.entries(barberData)) {
+      if (value === undefined) continue;
+
+      if (key === 'specialties' || key === 'schedule') {
+        fields.push(`${key} = ?`);
+        // Ensure we don't double-stringify if it's already a string
+        values.push(typeof value === 'string' ? value : JSON.stringify(value));
+      } else {
+        fields.push(`${key} = ?`);
+        values.push(value);
+      }
     }
-    return null;
+
+    if (fields.length === 0) return this.getBarberById(id);
+
+    values.push(id);
+
+    try {
+      await db.run(
+        `UPDATE barbers SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+        values
+      );
+      return this.getBarberById(id);
+    } catch (error) {
+      console.error("Error updating barber:", error);
+      throw error;
+    }
+  }
+
+  async deleteBarber(id) {
+    const db = await this.ensureInitialized();
+    const barber = await this.getBarberById(id);
+    if (barber) {
+      await db.run('DELETE FROM barbers WHERE id = ?', id);
+    }
+    return barber;
   }
 
   // Bookings
-  getBookings() {
-    return this.data.bookings;
+  async getBookings() {
+    const db = await this.ensureInitialized();
+    const bookings = await db.all('SELECT * FROM bookings');
+    return bookings.map(b => ({
+      ...b,
+      services: JSON.parse(b.services)
+    }));
   }
 
-  getBookingById(id) {
-    return this.data.bookings.find(booking => booking.id === parseInt(id));
-  }
-
-  getBookingsByCustomer(customerId) {
-    return this.data.bookings.filter(booking => booking.customer_id === parseInt(customerId));
-  }
-
-  createBooking(bookingData) {
-    const newBooking = {
-      id: Math.max(...this.data.bookings.map(b => b.id), 0) + 1,
-      ...bookingData,
-      created_at: new Date().toISOString()
-    };
-    this.data.bookings.push(newBooking);
-    this.saveData();
-    return newBooking;
-  }
-
-  updateBookingStatus(id, status) {
-    const index = this.data.bookings.findIndex(booking => booking.id === parseInt(id));
-    if (index !== -1) {
-      this.data.bookings[index].status = status;
-      this.data.bookings[index].updated_at = new Date().toISOString();
-      this.saveData();
-      return this.data.bookings[index];
+  async getBookingById(id) {
+    const db = await this.ensureInitialized();
+    const booking = await db.get('SELECT * FROM bookings WHERE id = ?', id);
+    if (booking) {
+      booking.services = JSON.parse(booking.services);
     }
-    return null;
+    return booking;
   }
 
-  deleteBooking(id) {
-    const index = this.data.bookings.findIndex(booking => booking.id === parseInt(id));
-    if (index !== -1) {
-      const deleted = this.data.bookings.splice(index, 1)[0];
-      this.saveData();
-      return deleted;
+  async getBookingsByCustomer(customerId) {
+    const db = await this.ensureInitialized();
+    const bookings = await db.all('SELECT * FROM bookings WHERE customer_id = ?', customerId);
+    return bookings.map(b => ({
+      ...b,
+      services: JSON.parse(b.services)
+    }));
+  }
+
+  async createBooking(bookingData) {
+    const db = await this.ensureInitialized();
+    const { booking_number, customer_id, customer_name, customer_email, customer_phone, barber_id, barber_name, services, date, time, payment_method, payment_status, status, total } = bookingData;
+
+    const result = await db.run(
+      `INSERT INTO bookings (booking_number, customer_id, customer_name, customer_email, customer_phone, barber_id, barber_name, services, date, time, payment_method, payment_status, status, total) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [booking_number, customer_id, customer_name, customer_email, customer_phone, barber_id, barber_name, JSON.stringify(services), date, time, payment_method, payment_status, status, total]
+    );
+    return this.getBookingById(result.lastID);
+  }
+
+  async updateBookingStatus(id, status) {
+    const db = await this.ensureInitialized();
+    await db.run(
+      'UPDATE bookings SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [status, id]
+    );
+    return this.getBookingById(id);
+  }
+
+  async deleteBooking(id) {
+    const db = await this.ensureInitialized();
+    const booking = await this.getBookingById(id);
+    if (booking) {
+      await db.run('DELETE FROM bookings WHERE id = ?', id);
     }
-    return null;
+    return booking;
   }
 
   // Contact Messages
-  getContactMessages() {
-    return this.data.contact_messages;
+  async getContactMessages() {
+    const db = await this.ensureInitialized();
+    return await db.all('SELECT * FROM contact_messages');
   }
 
-  getContactMessageById(id) {
-    return this.data.contact_messages.find(message => message.id === parseInt(id));
+  async getContactMessageById(id) {
+    const db = await this.ensureInitialized();
+    return await db.get('SELECT * FROM contact_messages WHERE id = ?', id);
   }
 
-  createContactMessage(messageData) {
-    const newMessage = {
-      id: Math.max(...this.data.contact_messages.map(m => m.id), 0) + 1,
-      ...messageData,
-      read: false,
-      created_at: new Date().toISOString()
-    };
-    this.data.contact_messages.push(newMessage);
-    this.saveData();
-    return newMessage;
+  async createContactMessage(messageData) {
+    const db = await this.ensureInitialized();
+    const { name, email, phone, subject, message } = messageData;
+    const result = await db.run(
+      'INSERT INTO contact_messages (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)',
+      [name, email, phone, subject, message]
+    );
+    return this.getContactMessageById(result.lastID);
   }
 
-  markMessageAsRead(id) {
-    const index = this.data.contact_messages.findIndex(message => message.id === parseInt(id));
-    if (index !== -1) {
-      this.data.contact_messages[index].read = true;
-      this.saveData();
-      return this.data.contact_messages[index];
+  async markContactMessageAsRead(id) {
+    const db = await this.ensureInitialized();
+    await db.run('UPDATE contact_messages SET read = 1 WHERE id = ?', id);
+    return this.getContactMessageById(id);
+  }
+
+  async deleteContactMessage(id) {
+    const db = await this.ensureInitialized();
+    const message = await this.getContactMessageById(id);
+    if (message) {
+      await db.run('DELETE FROM contact_messages WHERE id = ?', id);
     }
-    return null;
+    return message;
   }
 
-  deleteContactMessage(id) {
-    const index = this.data.contact_messages.findIndex(message => message.id === parseInt(id));
-    if (index !== -1) {
-      const deleted = this.data.contact_messages.splice(index, 1)[0];
-      this.saveData();
-      return deleted;
+  // Messages (Internal)
+  async getMessages() {
+    const db = await this.ensureInitialized();
+    return await db.all('SELECT * FROM messages');
+  }
+
+  async getMessageById(id) {
+    const db = await this.ensureInitialized();
+    return await db.get('SELECT * FROM messages WHERE id = ?', id);
+  }
+
+  async getMessagesBySender(senderId) {
+    const db = await this.ensureInitialized();
+    return await db.all('SELECT * FROM messages WHERE sender_id = ?', senderId);
+  }
+
+  async getMessagesByRecipient(recipientId) {
+    const db = await this.ensureInitialized();
+    return await db.all('SELECT * FROM messages WHERE recipient_id = ?', recipientId);
+  }
+
+  async getConversation(senderId, recipientId) {
+    const db = await this.ensureInitialized();
+    return await db.all(
+      `SELECT * FROM messages 
+       WHERE (sender_id = ? AND recipient_id = ?) 
+       OR (sender_id = ? AND recipient_id = ?) 
+       ORDER BY created_at ASC`,
+      [senderId, recipientId, recipientId, senderId]
+    );
+  }
+
+  async createMessage(messageData) {
+    const db = await this.ensureInitialized();
+    const { sender_id, recipient_id, content } = messageData;
+    const result = await db.run(
+      'INSERT INTO messages (sender_id, recipient_id, content) VALUES (?, ?, ?)',
+      [sender_id, recipient_id, content]
+    );
+    return this.getMessageById(result.lastID);
+  }
+
+  async markInternalMessageAsRead(id) {
+    const db = await this.ensureInitialized();
+    await db.run('UPDATE messages SET read = 1 WHERE id = ?', id);
+    return this.getMessageById(id);
+  }
+
+  async deleteMessage(id) {
+    const db = await this.ensureInitialized();
+    const message = await this.getMessageById(id);
+    if (message) {
+      await db.run('DELETE FROM messages WHERE id = ?', id);
     }
-    return null;
-  }
-
-  // Messages
-  getMessages() {
-    return this.data.messages;
-  }
-
-  getMessageById(id) {
-    return this.data.messages.find(message => message.id === parseInt(id));
-  }
-
-  getMessagesBySender(senderId) {
-    return this.data.messages.filter(message => message.sender_id === parseInt(senderId));
-  }
-
-  getMessagesByRecipient(recipientId) {
-    return this.data.messages.filter(message => message.recipient_id === parseInt(recipientId));
-  }
-
-  getConversation(senderId, recipientId) {
-    return this.data.messages.filter(message =>
-      (message.sender_id === parseInt(senderId) && message.recipient_id === parseInt(recipientId)) ||
-      (message.sender_id === parseInt(recipientId) && message.recipient_id === parseInt(senderId))
-    ).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-  }
-
-  createMessage(messageData) {
-    const newMessage = {
-      id: Math.max(...this.data.messages.map(m => m.id), 0) + 1,
-      ...messageData,
-      read: false,
-      created_at: new Date().toISOString()
-    };
-    this.data.messages.push(newMessage);
-    this.saveData();
-    return newMessage;
-  }
-
-  markMessageAsRead(id) {
-    const index = this.data.messages.findIndex(message => message.id === parseInt(id));
-    if (index !== -1) {
-      this.data.messages[index].read = true;
-      this.saveData();
-      return this.data.messages[index];
-    }
-    return null;
-  }
-
-  deleteMessage(id) {
-    const index = this.data.messages.findIndex(message => message.id === parseInt(id));
-    if (index !== -1) {
-      const deleted = this.data.messages.splice(index, 1)[0];
-      this.saveData();
-      return deleted;
-    }
-    return null;
+    return message;
   }
 }
 
-const db = new SimpleDatabase();
+const db = new SqliteDatabase();
 
 export default db;

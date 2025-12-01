@@ -124,22 +124,33 @@ export class AIService {
     const faceHeight = faceBox.height;
     const faceWidth = faceBox.width;
 
+    // Adjust jaw width for potential beard coverage (if jaw is very narrow but cheeks are wide)
+    let adjustedJawWidth = jawWidth;
+    if (jawWidth < cheekWidth * 0.6) {
+      // Likely a beard or shadow obscuring the jawline
+      adjustedJawWidth = cheekWidth * 0.75; // Estimate
+    }
+
     // Geometric Logic
     if (Math.abs(faceWidth - faceHeight) < faceWidth * 0.2) {
       // Compact face (Round/Square)
-      if (jawWidth > cheekWidth * 0.9) return 'square';
+      if (adjustedJawWidth > cheekWidth * 0.9) return 'square';
       return 'round';
     } else {
       // Long face (Oval/Heart/Diamond)
-      if (jawWidth > cheekWidth * 0.9) return 'square'; // Rectangular
-      if (cheekWidth > foreheadWidth && cheekWidth > jawWidth) {
-        if (jawWidth < foreheadWidth * 0.8) return 'diamond';
+      if (adjustedJawWidth > cheekWidth * 0.9) return 'square'; // Rectangular
+
+      if (cheekWidth > foreheadWidth && cheekWidth > adjustedJawWidth) {
+        if (adjustedJawWidth < foreheadWidth * 0.7) return 'diamond';
         return 'oval';
       }
-      if (foreheadWidth > cheekWidth && foreheadWidth > jawWidth) return 'heart';
-    }
 
-    return 'oval'; // Default
+      // Heart shape requires forehead to be significantly wider
+      if (foreheadWidth > cheekWidth * 1.05 && foreheadWidth > adjustedJawWidth) return 'heart';
+
+      // Default to oval if no strong indicators
+      return 'oval';
+    }
   }
 
   private getSkinWidthAtY(pixels: Uint8ClampedArray, width: number, y: number, minX: number, maxX: number): number {

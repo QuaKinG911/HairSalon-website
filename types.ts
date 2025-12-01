@@ -17,6 +17,17 @@ export interface Stylist {
   bio: string;
   image: string;
   specialties: string[];
+  schedule?: {
+    days: string[]; // Deprecated, kept for backward compatibility if needed, but we'll use detailed slots
+    start: string; // Deprecated
+    end: string; // Deprecated
+    slots?: {
+      day: string;
+      startTime: string;
+      endTime: string;
+      isActive: boolean;
+    }[];
+  };
 }
 
 export interface AIResult {
@@ -95,6 +106,7 @@ export interface User {
   role: string;
   name: string;
   phone?: string;
+  image?: string;
   saved_styles?: HairstyleRecommendation[];
 }
 

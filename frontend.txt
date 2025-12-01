@@ -1,0 +1,20 @@
+
+> luxe-barber@0.0.0 dev
+> vite
+
+
+  VITE v6.4.1  ready in 288 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://10.135.46.220:3000/
+  ➜  Network: http://172.19.0.1:3000/
+  ➜  press h + enter to show help
+12:48:07 PM [vite] (client) hmr update /pages/barber/Dashboard.tsx, /index.css
+12:48:09 PM [vite] (client) hmr update /pages/barber/Dashboard.tsx, /index.css
+12:51:35 PM [vite] (client) hmr update /pages/barber/Dashboard.tsx, /index.css
+1:01:41 PM [vite] (client) hmr update /pages/barber/Dashboard.tsx, /index.css
+1:02:01 PM [vite] (client) hmr update /pages/Stylists.tsx, /index.css
+1:02:03 PM [vite] (client) hmr update /pages/barber/Dashboard.tsx, /index.css
+1:09:56 PM [vite] (client) hmr update /pages/Stylists.tsx, /index.css
+1:13:44 PM [vite] (client) hmr update /pages/Stylists.tsx, /index.css
+1:16:21 PM [vite] (client) hmr update /pages/barber/Dashboard.tsx, /index.css

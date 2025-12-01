@@ -4,6 +4,7 @@ import { Scissors, Menu, X, ShoppingBag, User, LogOut, LayoutDashboard, MessageS
 import { useBooking } from '../context/BookingContext';
 import { useAuth } from '../context/AuthContext';
 import { messagesAPI } from '../src/api';
+import Notifications from './Notifications';
 
 const UserMenu: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -147,6 +148,9 @@ const Layout: React.FC = () => {
                   </span>
                 )}
               </Link>
+
+              {/* Notifications */}
+              <Notifications />
 
               {/* User Menu */}
               <UserMenu />

@@ -7,7 +7,7 @@ const router = express.Router();
 // Get all messages (admin only)
 router.get('/', async (req, res) => {
   try {
-    const messages = db.getMessages();
+    const messages = await db.getMessages();
     res.json(messages);
   } catch (error) {
     console.error('Get messages error:', error);
@@ -25,8 +25,8 @@ router.get('/my-messages', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const sentMessages = db.getMessagesBySender(userId);
-    const receivedMessages = db.getMessagesByRecipient(userId);
+    const sentMessages = await db.getMessagesBySender(userId);
+    const receivedMessages = await db.getMessagesByRecipient(userId);
     console.log('Sent messages:', sentMessages.length, 'Received messages:', receivedMessages.length);
     const allMessages = [...sentMessages, ...receivedMessages].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -47,7 +47,7 @@ router.get('/conversation/:otherUserId', authenticateToken, async (req, res) => 
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const conversation = db.getConversation(userId, otherUserId);
+    const conversation = await db.getConversation(userId, otherUserId);
     res.json(conversation);
   } catch (error) {
     console.error('Get conversation error:', error);
@@ -65,7 +65,7 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const message = db.createMessage({
+    const message = await db.createMessage({
       sender_id: senderId,
       recipient_id: recipientId,
       subject,
@@ -89,12 +89,12 @@ router.put('/:id/read', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const message = db.getMessageById(id);
+    const message = await db.getMessageById(id);
     if (!message || message.recipient_id !== parseInt(userId)) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const updatedMessage = db.markMessageAsRead(id);
+    const updatedMessage = await db.markInternalMessageAsRead(id);
     res.json(updatedMessage);
   } catch (error) {
     console.error('Mark message read error:', error);
@@ -112,12 +112,12 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const message = db.getMessageById(id);
+    const message = await db.getMessageById(id);
     if (!message || (message.sender_id !== parseInt(userId) && message.recipient_id !== parseInt(userId))) {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const deletedMessage = db.deleteMessage(id);
+    const deletedMessage = await db.deleteMessage(id);
     res.json({ message: 'Message deleted successfully' });
   } catch (error) {
     console.error('Delete message error:', error);

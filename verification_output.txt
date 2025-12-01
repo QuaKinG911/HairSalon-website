@@ -1,0 +1,20 @@
+Verifying migration...
+Original JSON counts: {
+  users: 5,
+  services: 6,
+  barbers: 3,
+  bookings: 0,
+  contact_messages: 0,
+  messages: 0
+}
+Connected to SQLite database
+Database already contains data, skipping migration
+SQLite database counts: {
+  users: 5,
+  services: 6,
+  barbers: 3,
+  bookings: 0,
+  contact_messages: 0,
+  messages: 0
+}
+SUCCESS: All data counts match!
