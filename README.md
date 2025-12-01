@@ -57,7 +57,7 @@ Dedicated portals for every user type ensure a tailored experience:
 1. **Clone the repository**
    ```bash
    git clone https://github.com/QuaKinG911/HairSalon-website.git
-   cd hairsalon
+   cd HairSalon-website
    ```
 
 2. **Install dependencies**
