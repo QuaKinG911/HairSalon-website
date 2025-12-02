@@ -4,7 +4,7 @@ import { LogOut, Calendar, Clock, Search, Package, CreditCard, User as UserIcon,
 import { useAuth } from '../../context/AuthContext';
 import Messenger from '../../components/Messenger';
 
-import { messagesAPI, usersAPI, barbersAPI } from '../../src/api';
+import { messagesAPI, usersAPI, barbersAPI, bookingsAPI } from '../../src/api';
 import { Message, User } from '../../types';
 
 interface Booking {
@@ -74,11 +74,31 @@ const BarberDashboard: React.FC = () => {
 
     const loadData = async () => {
         // Load Bookings
-        const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-        allBookings.sort((a: Booking, b: Booking) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        setBookings(allBookings);
+        try {
+            const data = await bookingsAPI.getAll();
+            const allBookings = data.map((b: any) => ({
+                id: b.id.toString(),
+                bookingNumber: b.booking_number,
+                customerName: b.customer_name,
+                customerEmail: b.customer_email,
+                customerPhone: b.customer_phone,
+                services: Array.isArray(b.services) ? b.services.join(', ') : b.services,
+                date: b.date,
+                time: b.time,
+                paymentMethod: b.payment_method,
+                paymentStatus: b.payment_status,
+                status: b.status,
+                total: b.total,
+                createdAt: b.created_at
+            }));
+
+            allBookings.sort((a: Booking, b: Booking) =>
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+            setBookings(allBookings);
+        } catch (error) {
+            console.error('Error loading bookings:', error);
+        }
 
         // Load Messages from API
         try {

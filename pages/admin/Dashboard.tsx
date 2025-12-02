@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import AdminServices from './Services';
 import AdminBarbers from './Barbers';
 import AdminMessages from './Messages';
+import AdminBookings from './Bookings';
 
 import { messagesAPI, usersAPI, bookingsAPI, servicesAPI } from '../../src/api';
 
@@ -77,6 +78,14 @@ const AdminDashboard: React.FC = () => {
                         >
                             Overview
                             {activeTab === 'overview' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-amber-500"></div>}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('bookings')}
+                            className={`pb-3 px-1 font-bold text-sm uppercase tracking-wider transition-colors relative whitespace-nowrap ${activeTab === 'bookings' ? 'text-amber-500' : 'text-gray-400 hover:text-gray-200'
+                                }`}
+                        >
+                            Bookings
+                            {activeTab === 'bookings' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-amber-500"></div>}
                         </button>
                         <button
                             onClick={() => setActiveTab('services')}
@@ -204,6 +213,7 @@ const AdminDashboard: React.FC = () => {
                 {activeTab === 'services' && <AdminServices />}
                 {activeTab === 'barbers' && <AdminBarbers />}
                 {activeTab === 'messages' && <AdminMessages />}
+                {activeTab === 'bookings' && <AdminBookings />}
             </main>
         </div>
     );

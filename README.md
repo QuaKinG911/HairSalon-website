@@ -42,9 +42,9 @@ Dedicated portals for every user type ensure a tailored experience:
 - **File Handling**: Multer
 
 ### Database
-- **System**: Custom JSON-based Local Database
-- **Why?**: Zero-configuration, easy to deploy for demonstrations, and portable.
-- **Structure**: `database.json` acts as the single source of truth, managed by `server/config/database.js`.
+- **System**: SQLite
+- **Why?**: Lightweight, serverless, and reliable relational database that requires zero configuration.
+- **Structure**: `hairsalon.db` stores all application data, managed by `server/config/database.js`.
 
 ## 🚀 Getting Started
 
@@ -85,20 +85,21 @@ JWT_SECRET=your-super-secret-key-change-this-in-production
 ## 📂 Project Structure
 
 ```
-├── src/                  # Frontend React Application
-│   ├── components/       # Reusable UI components
-│   ├── pages/            # Route components (Dashboards, Home, etc.)
-│   ├── services/         # API clients & AI Logic
-│   │   └── aiService.ts  # Client-side computer vision logic
-│   └── context/          # Global state (Auth, Theme)
-├── server/               # Backend Express Application
-│   ├── config/           # Configuration
-│   │   └── database.js   # Custom JSON database implementation
-│   ├── routes/           # API Endpoints
-│   ├── middleware/       # Auth & Error handling
-│   └── server.js         # Entry point
-├── database.json         # Local data storage
-└── public/               # Static assets
+├── components/       # Reusable UI components
+├── context/          # Global state (Auth, Booking)
+├── pages/            # Route components (Dashboards, Home, etc.)
+├── public/           # Static assets
+├── server/           # Backend Express Application
+│   ├── config/       # Configuration (Database)
+│   ├── middleware/   # Auth & Error handling
+│   ├── routes/       # API Endpoints
+│   └── server.js     # Entry point
+├── services/         # AI & Overlay Logic
+├── src/              # Entry point & API client
+│   ├── api.ts        # API client
+│   └── main.tsx      # React entry point
+├── utils/            # Shared utilities
+└── hairsalon.db      # SQLite Database
 ```
 
 ## 🔌 API Endpoints
@@ -115,6 +116,12 @@ JWT_SECRET=your-super-secret-key-change-this-in-production
 - `GET /api/bookings` - Get user's bookings.
 - `POST /api/bookings` - Create a new appointment.
 - `PUT /api/bookings/:id/status` - Update booking status (Cancel/Confirm).
+- `DELETE /api/bookings/:id` - Cancel/Delete a booking.
+
+### Messages
+- `GET /api/messages/my-messages` - Get user's messages.
+- `PUT /api/messages/:id/read` - Mark message as read.
+- `DELETE /api/messages/:id` - Delete a message.
 
 ### AI Analysis
 - *Note: The AI analysis is client-side. No API endpoint is required for face processing.*

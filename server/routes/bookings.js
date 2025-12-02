@@ -13,16 +13,6 @@ router.get('/', authenticateToken, async (req, res) => {
     // Filter based on role
     let filteredBookings = bookings;
 
-    // Filter out past bookings for non-admin views (or maybe for everyone if that's the request)
-    // The user said "for all the barbers i can see", implying the barber dashboard.
-    // Let's filter out past bookings for barbers.
-
-    const now = new Date();
-    filteredBookings = filteredBookings.filter(b => {
-      const bookingDate = new Date(`${b.date}T${b.time}`);
-      return bookingDate > now;
-    });
-
     if (req.user.role === 'barber') {
       // Find the barber profile associated with this user
       // Assuming name matches for now as there's no direct link in schema
