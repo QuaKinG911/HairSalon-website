@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Admin — Luxe Barber{% endblock %}
+{% block content %}
+<div class="page-dark" style="padding:2rem 0 4rem;">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div>
+        <h1 style="color:var(--amber-light);margin:0;">Admin</h1>
+        <p style="color:var(--muted);margin:0.25rem 0 0;">{{ user.name }}</p>
+      </div>
+      <a href="/logout" class="btn btn-dark" style="background:rgba(220,38,38,0.2);border:1px solid #991b1b;color:#fecaca;">Logout</a>
+    </div>
+
+    <nav class="tabs">
+      <a href="/admin/dashboard?tab=overview" class="{{ 'active' if tab == 'overview' else '' }}">Overview</a>
+      <a href="/admin/dashboard?tab=bookings" class="{{ 'active' if tab == 'bookings' else '' }}">Bookings</a>
+      <a href="/admin/dashboard?tab=services" class="{{ 'active' if tab == 'services' else '' }}">Services</a>
+      <a href="/admin/dashboard?tab=barbers" class="{{ 'active' if tab == 'barbers' else '' }}">Barbers</a>
+      <a href="/admin/dashboard?tab=messages" class="{{ 'active' if tab == 'messages' else '' }}">Messages</a>
+      <a href="/admin/dashboard?tab=contacts" class="{{ 'active' if tab == 'contacts' else '' }}">Inquiries</a>
+    </nav>
+
+    {% if tab == 'overview' %}
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value">{{ stats.bookings }}</div><div class="stat-label">Bookings</div></div>
+      <div class="stat-card"><div class="stat-value">{{ stats.services }}</div><div class="stat-label">Services</div></div>
+      <div class="stat-card"><div class="stat-value">{{ stats.customers }}</div><div class="stat-label">Customers</div></div>
+      <div class="stat-card"><div class="stat-value">{{ stats.unread_messages }}</div><div class="stat-label">Unread msgs</div></div>
+    </div>
+    {% elif tab == 'bookings' %}
+    <div class="table-wrap card-dark" style="padding:0;">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Number</th><th>Customer</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for b in bookings %}
+          <tr>
+            <td>{{ b.id }}</td>
+            <td>{{ b.booking_number }}</td>
+            <td>{{ b.customer_id }}</td>
+            <td>{{ b.date.strftime('%Y-%m-%d') if b.date else '' }}</td>
+            <td>{{ b.time }}</td>
+            <td>{{ b.status }}</td>
+            <td>
+              <form method="post" action="/admin/bookings/{{ b.id }}/status" style="display:inline;">
+                <select name="status" class="form-select" style="padding:0.25rem;font-size:0.75rem;">
+                  <option value="pending" {% if b.status == 'pending' %}selected{% endif %}>pending</option>
+                  <option value="confirmed" {% if b.status == 'confirmed' %}selected{% endif %}>confirmed</option>
+                  <option value="completed" {% if b.status == 'completed' %}selected{% endif %}>completed</option>
+                  <option value="cancelled" {% if b.status == 'cancelled' %}selected{% endif %}>cancelled</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% elif tab == 'services' %}
+    <div class="card-dark mb-8">
+      <h3 style="color:#fff;margin-top:0;">Add service</h3>
+      <form method="post" action="/admin/services/add" style="display:grid;gap:0.75rem;max-width:32rem;">
+        <input class="form-input" name="id" placeholder="id (e.g. 7)" required />
+        <input class="form-input" name="name" placeholder="Name" required />
+        <textarea class="form-textarea" name="description" placeholder="Description" required></textarea>
+        <input class="form-input" type="number" step="0.01" name="price" placeholder="Price" required />
+        <select class="form-select" name="category" required>
+          <option>Haircuts</option>
+          <option>Beard & Shave</option>
+          <option>Grooming</option>
+          <option>Packages</option>
+        </select>
+        <input class="form-input" name="image" placeholder="/images/services/photo.jpg" required />
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+    <div class="table-wrap card-dark" style="padding:0;">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Active</th><th></th></tr></thead>
+        <tbody>
+          {% for s in services %}
+          <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.name }}</td>
+            <td>${{ s.price }}</td>
+            <td>{{ s.is_active }}</td>
+            <td>
+              {% if s.is_active %}
+              <form method="post" action="/admin/services/{{ s.id }}/delete" style="display:inline;" onsubmit="return confirm('Deactivate?');">
+                <button type="submit" class="btn btn-dark btn-sm">Deactivate</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% elif tab == 'barbers' %}
+    <div class="card-dark mb-8">
+      <h3 style="color:#fff;margin-top:0;">Add barber</h3>
+      <form method="post" action="/admin/stylists/add" style="display:grid;gap:0.75rem;max-width:32rem;">
+        <input class="form-input" name="id" placeholder="id (e.g. s4)" required />
+        <input class="form-input" name="name" required />
+        <input class="form-input" name="role" placeholder="Role" required />
+        <textarea class="form-textarea" name="bio" required></textarea>
+        <input class="form-input" name="image" placeholder="/images/barbers/name.jpg" required />
+        <input class="form-input" name="specialties" placeholder="Comma-separated specialties" />
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+    <div class="table-wrap card-dark" style="padding:0;">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Role</th><th></th></tr></thead>
+        <tbody>
+          {% for s in stylists %}
+          <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.role }}</td>
+            <td>
+              <form method="post" action="/admin/stylists/{{ s.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete barber?');">
+                <button type="submit" class="btn btn-dark btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% elif tab == 'messages' %}
+    <div class="table-wrap card-dark" style="padding:0;">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>From</th><th>To</th><th>Subject</th><th>Read</th><th>When</th></tr></thead>
+        <tbody>
+          {% for m in messages %}
+          <tr>
+            <td>{{ m.id }}</td>
+            <td>{{ m.sender_id }}</td>
+            <td>{{ m.recipient_id }}</td>
+            <td>{{ m.subject }}</td>
+            <td>{{ m.read }}</td>
+            <td>{{ m.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% elif tab == 'contacts' %}
+    <div class="table-wrap card-dark" style="padding:0;">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Message</th><th>Responded</th></tr></thead>
+        <tbody>
+          {% for c in contacts %}
+          <tr>
+            <td>{{ c.id }}</td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.email }}</td>
+            <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;">{{ c.message }}</td>
+            <td>{{ c.responded }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

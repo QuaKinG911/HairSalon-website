@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Login — Luxe Barber{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div>
+    <div class="text-center mb-8">
+      <div style="width:4rem;height:4rem;background:var(--amber);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;margin-bottom:1rem;">⎆</div>
+      <h1 style="color:#fff;font-size:1.875rem;margin:0;">Welcome Back</h1>
+      <p class="sub" style="color:var(--muted);">Sign in to your account</p>
+    </div>
+    <div class="auth-card">
+      <form method="post" action="/login" class="mb-4">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-input" type="email" id="email" name="email" required placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" id="password" name="password" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:0.5rem;">Sign In</button>
+      </form>
+      <p class="text-center" style="color:var(--muted);font-size:0.875rem;">
+        No account? <a href="/signup" style="color:var(--amber-light);font-weight:700;">Sign Up</a>
+      </p>
+      <p class="text-center mt-4">
+        <a href="/" style="color:var(--muted);font-size:0.875rem;">← Back to Home</a>
+      </p>
+      <p style="color:var(--muted);font-size:0.75rem;margin-top:1.5rem;text-align:center;">
+        Demo: admin@hairsalon.com / barber@hairsalon.com / customer@example.com — password <code style="color:#fff;">password</code>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

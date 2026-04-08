@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Barber dashboard — Luxe Barber{% endblock %}
+{% block content %}
+<div class="page-dark" style="padding:2rem 0 4rem;">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div>
+        <h1 style="color:var(--amber-light);margin:0;">Barber dashboard</h1>
+        <p style="color:var(--muted);margin:0.25rem 0 0;">{{ user.name }}</p>
+      </div>
+      <a href="/logout" class="btn btn-dark" style="background:rgba(220,38,38,0.2);border:1px solid #991b1b;color:#fecaca;">Logout</a>
+    </div>
+
+    <nav class="tabs">
+      <a href="/barber/dashboard?tab=overview" class="{{ 'active' if tab == 'overview' else '' }}">Overview</a>
+      <a href="/barber/dashboard?tab=bookings" class="{{ 'active' if tab == 'bookings' else '' }}">Bookings</a>
+      <a href="/contact" class="">Messages</a>
+    </nav>
+
+    {% if tab == 'overview' %}
+    <p style="color:var(--muted);">Use the bookings tab to update appointment status. Message customers from <a href="/contact" style="color:var(--amber-light);">Contact</a>.</p>
+    <p style="color:var(--muted);">Customers in directory: {{ customer_contacts|length }}</p>
+    {% elif tab == 'bookings' %}
+    <div class="table-wrap card-dark" style="padding:0;">
+      <table class="data-table">
+        <thead><tr><th>Number</th><th>Customer #</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for b in bookings %}
+          <tr>
+            <td style="color:var(--amber-light);font-weight:700;">{{ b.booking_number }}</td>
+            <td>{{ b.customer_id }}</td>
+            <td>{{ b.date.strftime('%Y-%m-%d') if b.date else '' }}</td>
+            <td>{{ b.time }}</td>
+            <td>{{ b.status }}</td>
+            <td>
+              <form method="post" action="/barber/bookings/{{ b.id }}/status" style="display:inline;">
+                <select name="status" class="form-select" style="padding:0.25rem;font-size:0.75rem;">
+                  <option value="pending" {% if b.status == 'pending' %}selected{% endif %}>pending</option>
+                  <option value="confirmed" {% if b.status == 'confirmed' %}selected{% endif %}>confirmed</option>
+                  <option value="completed" {% if b.status == 'completed' %}selected{% endif %}>completed</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

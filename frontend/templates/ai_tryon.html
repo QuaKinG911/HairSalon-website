@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}AI Consultant — Luxe Barber{% endblock %}
+{% block content %}
+<div class="page-dark" style="padding:2rem 0 4rem;">
+  <div class="container ai-panel">
+    <h1 style="color:#fff;font-size:2rem;margin-bottom:0.5rem;">AI Style Consultant</h1>
+    <p style="color:var(--muted);margin-bottom:2rem;">Upload a photo for a quick on-device preview (demo analysis). Results suggest styles from our catalog.</p>
+
+    <div id="step-upload" class="card-dark mb-4">
+      <h2 style="color:#fff;margin-top:0;font-size:1.125rem;">1. Your photo</h2>
+      <input type="file" id="photo" accept="image/*" class="form-input" style="padding:0.5rem;" />
+      <div id="preview-wrap" class="hidden mt-4">
+        <img id="preview" alt="" style="max-width:100%;max-height:280px;border-radius:4px;" />
+      </div>
+      <button type="button" class="btn btn-primary mt-4" id="btnPrefs" disabled>Continue</button>
+    </div>
+
+    <div id="step-prefs" class="card-dark mb-4 hidden">
+      <h2 style="color:#fff;margin-top:0;font-size:1.125rem;">2. Preferences</h2>
+      <div class="form-group">
+        <label class="form-label">Occasion</label>
+        <select id="occasion" class="form-select">
+          <option value="casual">Casual</option>
+          <option value="business">Business</option>
+          <option value="formal">Formal</option>
+        </select>
+      </div>
+      <button type="button" class="btn btn-primary" id="btnAnalyze">Run analysis</button>
+    </div>
+
+    <div id="step-analyzing" class="card-dark hidden text-center">
+      <p style="color:var(--amber-light);">Analyzing image…</p>
+    </div>
+
+    <div id="step-results" class="hidden">
+      <div class="card-dark mb-4">
+        <h2 style="color:#fff;margin-top:0;">Analysis (demo)</h2>
+        <p id="analysis-text" style="color:var(--muted);"></p>
+      </div>
+      <h3 style="color:#fff;">Suggested styles</h3>
+      <div class="rec-grid" id="rec-grid"></div>
+      <p class="mt-4" style="color:var(--muted);font-size:0.875rem;">Add a service from the <a href="/services" style="color:var(--amber-light);">Services</a> page, then book from your cart.</p>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="hair-data">{{ hairstyles | tojson }}</script>
+<script src="/static/js/ai_tryon.js"></script>
+{% endblock %}

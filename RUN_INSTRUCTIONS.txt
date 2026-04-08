@@ -1,0 +1,72 @@
+═══════════════════════════════════════════════════════════════════
+                    LUXE BARBER - HOW TO RUN
+═══════════════════════════════════════════════════════════════════
+
+METHOD 1: Using the run.sh script (RECOMMENDED)
+─────────────────────────────────────────────────
+Open a terminal and run:
+
+    ./run.sh
+
+This will:
+  ✅ Start backend on http://localhost:8000
+  ✅ Start frontend on http://localhost:3000
+  ✅ Show real-time logs for both servers
+  ✅ Stop both servers with Ctrl+C
+
+
+METHOD 2: Manual Start (Two Terminals)
+───────────────────────────────────────
+Terminal 1 - Backend:
+    cd backend
+    python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+Terminal 2 - Frontend:
+    cd frontend
+    npm run dev
+
+
+METHOD 3: Using npm from root
+──────────────────────────────
+    npm run dev:full
+
+
+ACCESS POINTS
+──────────────
+Once running, access the application at:
+
+  🌐 Frontend: http://localhost:3000
+  ⚙️  Backend:  http://localhost:8000
+  📚 API Docs: http://localhost:8000/docs
+  💚 Health:   http://localhost:8000/health
+
+
+DEMO ACCOUNTS
+─────────────
+  👤 Admin:    admin@hairsalon.com / password
+  ✂️  Barber:   barber@hairsalon.com / password
+  🧑 Customer: customer@example.com / password
+
+
+IMPORTANT NOTES
+───────────────
+1. PostgreSQL must be running for full functionality
+2. Run 'npm install' in frontend/ if node_modules missing
+3. Run 'pip install -r requirements.txt' in backend/ if needed
+4. Check backend/.env for database configuration
+
+
+TROUBLESHOOTING
+───────────────
+Port already in use?
+  lsof -ti:8000 | xargs kill -9
+  lsof -ti:3000 | xargs kill -9
+
+Database connection failed?
+  - Ensure PostgreSQL is running
+  - Check DATABASE_URL in backend/.env
+
+Missing dependencies?
+  cd frontend && npm install
+  cd backend && pip install -r requirements.txt
+

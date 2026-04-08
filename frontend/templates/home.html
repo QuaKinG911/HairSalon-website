@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="hero-bg">
+    <img src="/images/services/TheGentlemanPackage.jpg" alt="Barber shop" />
+    <div class="hero-overlay"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">Premium Men's Grooming</div>
+    <h1 class="hero-title">Refine Your <br /><span class="hero-gradient">Legacy</span></h1>
+    <p class="hero-sub">Where traditional barbering meets modern innovation. Experience our AI consultation and master craftsmanship.</p>
+    <div class="hero-actions">
+      <a href="/booking" class="btn btn-primary" style="padding:1rem 2.5rem;">Book Appointment</a>
+      <a href="/ai-try-on" class="btn btn-outline" style="padding:1rem 2.5rem;">✨ AI Style Consult</a>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="features-grid">
+    <div class="feature-card">
+      <div style="font-size:1.75rem;margin-bottom:1rem;">✨</div>
+      <h3>AI Face Analysis</h3>
+      <p>Upload your photo to explore style suggestions matched to face shape and hair type before you book.</p>
+    </div>
+    <div class="feature-card">
+      <div style="font-size:1.75rem;margin-bottom:1rem;">✂</div>
+      <h3>Master Barbers</h3>
+      <p>Industry veterans for classic cuts, modern fades, and precision detailing.</p>
+    </div>
+    <div class="feature-card">
+      <div style="font-size:1.75rem;margin-bottom:1rem;">★</div>
+      <h3>VIP Experience</h3>
+      <p>Complimentary drinks, hot towel service, and a relaxed atmosphere built for the modern man.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page-dark" style="padding:4rem 0;">
+  <div class="container" style="display:flex;flex-wrap:wrap;gap:3rem;align-items:center;max-width:72rem;">
+    <div style="flex:1;min-width:280px;position:relative;">
+      <div style="position:absolute;inset:-1rem;border:2px solid rgba(217,119,6,0.3);border-radius:2px;transform:translate(1rem,1rem);"></div>
+      <img src="/images/services/TheExecutiveCut.jpg" alt="Executive cut" style="position:relative;width:100%;max-height:500px;object-fit:cover;border-radius:2px;filter:grayscale(1);" />
+    </div>
+    <div style="flex:1;min-width:280px;">
+      <span style="color:var(--amber-light);font-weight:700;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;">Who We Are</span>
+      <h2 style="color:#fff;font-size:2.5rem;margin:1rem 0;">The Gentlemen's Standard</h2>
+      <p style="color:var(--muted);line-height:1.7;">Luxe Barber was founded on a simple principle: men deserve a better grooming experience. We've ditched the rush of discount chains and the pretension of high-end salons.</p>
+      <p style="color:var(--muted);line-height:1.7;">Relax, get tailored advice, and leave looking sharper than ever. It's not just a haircut; it's a ritual.</p>
+      <a href="/services" class="btn btn-primary mt-4" style="margin-top:1.5rem;">Explore Services →</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

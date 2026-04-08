@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Checkout — Luxe Barber{% endblock %}
+{% block content %}
+<div class="page-dark" style="padding:2rem 0 4rem;">
+  <div class="container" style="max-width:40rem;">
+    <div style="display:flex;justify-content:center;gap:1rem;margin-bottom:2rem;">
+      <span class="btn btn-dark" style="width:3rem;height:3rem;padding:0;border-radius:50%;opacity:0.7;">1</span>
+      <span style="width:4rem;height:4px;background:var(--amber);align-self:center;"></span>
+      <span class="btn btn-primary" style="cursor:default;width:3rem;height:3rem;padding:0;border-radius:50%;">2</span>
+    </div>
+    <div class="card-dark" style="border-top:4px solid var(--amber);">
+      <h2 style="color:#fff;margin-top:0;">Secure checkout</h2>
+      <p style="color:var(--muted);font-size:0.875rem;">{{ draft.date }} at {{ draft.time }}</p>
+      <form method="post" action="/booking/complete" class="mt-4">
+        <input type="hidden" name="payment_method" id="pay_method" value="online" />
+        <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+          <button type="button" class="btn btn-dark" id="payOnline" style="flex:1;border:2px solid var(--amber);">Pay online</button>
+          <button type="button" class="btn btn-dark" id="paySalon" style="flex:1;opacity:0.7;">Pay in shop</button>
+        </div>
+        <div id="card-fields">
+          <p style="color:var(--muted);font-size:0.875rem;">Demo only — card fields are not processed.</p>
+          <div class="form-group">
+            <label class="form-label">Card number</label>
+            <input class="form-input" placeholder="0000 0000 0000 0000" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-group">
+              <label class="form-label">Expiry</label>
+              <input class="form-input" placeholder="MM/YY" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVC</label>
+              <input class="form-input" placeholder="123" />
+            </div>
+          </div>
+        </div>
+        <div id="salon-note" class="hidden" style="color:var(--muted);margin-bottom:1rem;">You can pay when you arrive. We accept cash and major cards.</div>
+        <button type="submit" class="btn btn-primary btn-block mt-4" id="submitBtn">Pay ${{ '%.2f'|format(total) }}</button>
+      </form>
+      <a href="/booking" class="btn btn-outline btn-block mt-4" style="margin-top:1rem;text-align:center;">Back to details</a>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var online = document.getElementById('payOnline');
+  var salon = document.getElementById('paySalon');
+  var method = document.getElementById('pay_method');
+  var fields = document.getElementById('card-fields');
+  var salonNote = document.getElementById('salon-note');
+  var submit = document.getElementById('submitBtn');
+  function setMode(m) {
+    method.value = m;
+    if (m === 'online') {
+      fields.classList.remove('hidden');
+      salonNote.classList.add('hidden');
+      online.style.opacity = '1';
+      online.style.borderColor = 'var(--amber)';
+      salon.style.opacity = '0.7';
+      salon.style.borderColor = 'transparent';
+      submit.textContent = 'Pay ${{ '%.2f'|format(total) }}';
+    } else {
+      fields.classList.add('hidden');
+      salonNote.classList.remove('hidden');
+      salon.style.opacity = '1';
+      salon.style.borderColor = 'var(--amber)';
+      online.style.opacity = '0.7';
+      online.style.borderColor = 'transparent';
+      submit.textContent = 'Confirm booking';
+    }
+  }
+  online.addEventListener('click', function () { setMode('online'); });
+  salon.addEventListener('click', function () { setMode('salon'); });
+})();
+</script>
+{% endblock %}

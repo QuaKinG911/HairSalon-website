@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Contact — Luxe Barber{% endblock %}
+{% block content %}
+<div class="page-dark" style="padding:2rem 0 4rem;">
+  <div class="container">
+    <h1 style="color:#fff;font-size:2rem;margin-bottom:1.5rem;">💬 Messages &amp; Contact</h1>
+
+    <div class="card-dark mb-8" style="max-width:36rem;">
+      <h2 style="color:#fff;font-size:1.125rem;margin-top:0;">Send us a note</h2>
+      <p style="color:var(--muted);font-size:0.875rem;">Guest inquiries (no login required)</p>
+      <form method="post" action="/contact/inquiry">
+        <div class="form-group">
+          <label class="form-label" for="gname">Name</label>
+          <input class="form-input" id="gname" name="name" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gemail">Email</label>
+          <input class="form-input" type="email" id="gemail" name="email" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gphone">Phone</label>
+          <input class="form-input" id="gphone" name="phone" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gmsg">Message</label>
+          <textarea class="form-textarea" id="gmsg" name="message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    {% if user %}
+    <h2 style="color:#fff;font-size:1.25rem;margin-bottom:1rem;">Inbox</h2>
+    <div style="display:grid;grid-template-columns:220px 1fr;gap:1rem;min-height:420px;">
+      <div class="card-dark" style="padding:0;overflow:hidden;">
+        {% for c in messenger_contacts %}
+        <a href="/contact?with={{ c.id }}" style="display:block;padding:0.75rem 1rem;border-bottom:1px solid var(--border);color:{% if messenger_selected and messenger_selected.id == c.id %}var(--amber-light){% else %}var(--muted){% endif %};font-size:0.875rem;">
+          {{ c.name }}<br /><span style="font-size:0.7rem;opacity:0.8;">{{ c.role.value }}</span>
+        </a>
+        {% else %}
+        <p style="padding:1rem;color:var(--muted);font-size:0.875rem;">No contacts yet.</p>
+        {% endfor %}
+      </div>
+      <div class="card-dark" style="display:flex;flex-direction:column;">
+        {% if messenger_selected %}
+        <div style="flex:1;overflow-y:auto;max-height:280px;margin-bottom:1rem;">
+          {% for m in messenger_thread %}
+          <div style="margin-bottom:0.75rem;padding:0.5rem;border-radius:4px;background:{% if m.sender_id == user.id %}rgba(217,119,6,0.15){% else %}rgba(255,255,255,0.05){% endif %};">
+            <div style="font-size:0.65rem;color:var(--muted);">{{ m.created_at }}</div>
+            <strong style="color:#fff;font-size:0.8rem;">{{ m.subject }}</strong>
+            <p style="color:var(--muted);font-size:0.875rem;margin:0.25rem 0 0;">{{ m.content }}</p>
+          </div>
+          {% else %}
+          <p style="color:var(--muted);">No messages yet. Say hello below.</p>
+          {% endfor %}
+        </div>
+        <form method="post" action="/contact/send">
+          <input type="hidden" name="recipient_id" value="{{ messenger_selected.id }}" />
+          <div class="form-group">
+            <input class="form-input" name="subject" placeholder="Subject" required />
+          </div>
+          <div class="form-group">
+            <textarea class="form-textarea" name="content" placeholder="Message" required style="min-height:80px;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">Send</button>
+        </form>
+        {% else %}
+        <p style="color:var(--muted);">Select a contact to view the thread.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <p style="color:var(--muted);">Log in to message barbers and staff directly.</p>
+    <a href="/login" class="btn btn-primary">Login</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

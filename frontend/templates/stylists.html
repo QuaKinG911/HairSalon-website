@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Barbers — Luxe Barber{% endblock %}
+{% block content %}
+<div class="page-dark" style="padding:4rem 0;">
+  <div class="container">
+    <h1 class="text-center mb-8" style="color:#fff;font-size:3rem;margin-bottom:2rem;">Our Barbers</h1>
+    <div class="services-grid">
+      {% for s in stylists %}
+      <div class="service-card">
+        <img src="{{ s.image }}" alt="{{ s.name }}" />
+        <div class="service-body">
+          <span style="color:var(--amber-light);font-size:0.75rem;font-weight:700;text-transform:uppercase;">{{ s.role }}</span>
+          <h3 style="color:#fff;margin:0.5rem 0;">{{ s.name }}</h3>
+          <p style="color:var(--muted);font-size:0.875rem;line-height:1.6;">{{ s.bio }}</p>
+          {% if s.specialties %}
+          <ul style="color:var(--muted);font-size:0.8rem;padding-left:1.25rem;margin:1rem 0 0;">
+            {% for sp in s.specialties %}
+            <li>{{ sp }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

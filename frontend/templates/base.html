@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Luxe Barber{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% if not hide_nav|default(false) %}
+  <header class="site-header">
+    <div class="container site-header-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon">✂</span>
+        <span class="logo-text">Luxe Barber</span>
+      </a>
+      <nav class="nav-desktop">
+        {% set p = request.url.path %}
+        <a href="/" class="{{ 'active' if p == '/' else '' }}">Home</a>
+        <a href="/services" class="{{ 'active' if p.startswith('/services') else '' }}">Services</a>
+        <a href="/stylists" class="{{ 'active' if p.startswith('/stylists') else '' }}">Barbers</a>
+        <a href="/ai-try-on" class="{{ 'active' if p.startswith('/ai-try-on') else '' }}">AI Consultant</a>
+        <a href="/contact" class="{{ 'active' if p.startswith('/contact') else '' }}">Contact</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/booking" class="icon-link" title="Booking cart">🛒{% if cart_count %}<span class="badge-count">{{ cart_count }}</span>{% endif %}</a>
+        {% if user %}
+        <a href="/contact" class="icon-link" title="Messages">💬{% if unread_messages %}<span class="badge-count">{{ unread_messages }}</span>{% endif %}</a>
+        <a href="{% if user.role.value == 'admin' %}/admin/dashboard{% elif user.role.value == 'barber' %}/barber/dashboard{% else %}/my-bookings{% endif %}" class="user-pill">📊 {{ user.name }}</a>
+        <a href="/logout" class="btn-icon" title="Logout">⎋</a>
+        {% else %}
+        <a href="/login" class="btn-login">👤 Login</a>
+        {% endif %}
+        <button type="button" class="mobile-toggle" id="navToggle" aria-label="Menu">☰</button>
+      </div>
+    </div>
+    <div class="container nav-mobile" id="navMobile">
+      {% set p = request.url.path %}
+      <a href="/" class="{{ 'active' if p == '/' else '' }}">Home</a>
+      <a href="/services" class="{{ 'active' if p.startswith('/services') else '' }}">Services</a>
+      <a href="/stylists" class="{{ 'active' if p.startswith('/stylists') else '' }}">Barbers</a>
+      <a href="/ai-try-on" class="{{ 'active' if p.startswith('/ai-try-on') else '' }}">AI Consultant</a>
+      <a href="/contact" class="{{ 'active' if p.startswith('/contact') else '' }}">Contact</a>
+      {% if not user %}<a href="/login">Login</a>{% endif %}
+    </div>
+  </header>
+  {% endif %}
+
+  {% if flash %}
+  <div class="flash flash-{{ flash.kind }}">{{ flash.message }}</div>
+  {% endif %}
+
+  <main class="layout-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if not hide_nav|default(false) %}
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:1rem;">
+          <span class="logo-icon">✂</span>
+          <span class="logo-text">Luxe Barber</span>
+        </div>
+        <p class="footer-muted">Refining the modern gentleman through exceptional grooming experiences and cutting-edge technology.</p>
+      </div>
+      <div>
+        <h3 class="footer-title">Location</h3>
+        <ul class="footer-muted" style="list-style:none;padding:0;margin:0;">
+          <li>Yangzhou University</li>
+          <li style="color:#fff;margin-top:0.5rem;">+1 (555) 123-4567</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="footer-title">Hours</h3>
+        <p class="footer-muted">Everyday · 9:00 – 11:00</p>
+      </div>
+    </div>
+    <div class="container footer-copy">© {{ year }} Luxe Barber. All rights reserved.</div>
+  </footer>
+  {% endif %}
+
+  <script>
+    (function () {
+      var t = document.getElementById('navToggle');
+      var m = document.getElementById('navMobile');
+      if (t && m) t.addEventListener('click', function () { m.classList.toggle('open'); });
+    })();
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

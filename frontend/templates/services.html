@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Services — Luxe Barber{% endblock %}
+{% block content %}
+<div class="page-dark" style="padding:4rem 0;">
+  <div class="container">
+    <div class="text-center mb-8">
+      <h1 style="color:#fff;font-size:3rem;margin:0 0 1rem;">Grooming Menu</h1>
+      <p style="color:var(--muted);max-width:36rem;margin:0 auto;">Premium services to keep you looking your best.</p>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;margin-bottom:3rem;">
+      {% for cat in categories %}
+      <a href="/services?category={{ cat | urlencode }}" class="btn {{ 'btn-primary' if filter_cat == cat else 'btn-dark' }}" style="text-transform:none;font-size:0.8rem;">{{ cat }}</a>
+      {% endfor %}
+    </div>
+    <div class="services-grid">
+      {% for service in services %}
+      <div class="service-card">
+        <img src="{{ service.image }}" alt="{{ service.name }}" />
+        <div class="service-body">
+          <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--amber-light);">{{ service.category }}</span>
+          <div class="service-meta">
+            <h3>{{ service.name }}</h3>
+            <span class="price">${{ '%.0f'|format(service.price) }}</span>
+          </div>
+          <p style="color:var(--muted);font-size:0.875rem;line-height:1.6;flex:1;">{{ service.description }}</p>
+          <form method="post" action="/cart/add" style="margin-top:1rem;">
+            <input type="hidden" name="service_id" value="{{ service.id }}" />
+            {% set incart = cart | selectattr('id', 'equalto', service.id) | list %}
+            {% if incart %}
+            <button type="button" class="btn btn-block btn-dark" disabled style="opacity:0.6;cursor:default;">✓ Selected</button>
+            {% else %}
+            <button type="submit" class="btn btn-block btn-dark">+ Book Service</button>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Booking — Luxe Barber{% endblock %}
+{% block content %}
+<div class="page-dark" style="padding:2rem 0 4rem;">
+  <div class="container">
+    <div style="display:flex;justify-content:center;gap:1rem;margin-bottom:2rem;">
+      <span class="btn btn-primary" style="cursor:default;width:3rem;height:3rem;padding:0;border-radius:50%;">1</span>
+      <span style="width:4rem;height:4px;background:var(--border);align-self:center;"></span>
+      <span class="btn btn-dark" style="width:3rem;height:3rem;padding:0;border-radius:50%;opacity:0.5;">2</span>
+    </div>
+    <div style="display:grid;gap:2rem;grid-template-columns:1fr;max-width:72rem;margin:0 auto;">
+      <div style="grid-column:1/-1;">
+        <h2 style="color:#fff;margin-bottom:1rem;">Review services</h2>
+        {% for item in cart %}
+        <div class="card-dark" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;">
+          <div style="display:flex;gap:1rem;align-items:center;">
+            {% if item.image %}<img src="{{ item.image }}" alt="" style="width:5rem;height:5rem;object-fit:cover;border-radius:2px;" />{% endif %}
+            <div>
+              <h3 style="color:#fff;margin:0;">{{ item.name }}</h3>
+              <p style="color:var(--muted);font-size:0.75rem;text-transform:uppercase;margin:0.25rem 0 0;">{{ item.category }}</p>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:1.5rem;">
+            <span style="color:#fff;font-weight:700;">${{ '%.0f'|format(item.price) }}</span>
+            <form method="post" action="/cart/remove">
+              <input type="hidden" name="service_id" value="{{ item.id }}" />
+              <button type="submit" class="btn-icon" style="color:var(--muted);" title="Remove">🗑</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="card-dark" style="border-top:4px solid var(--amber);max-width:24rem;">
+        <h3 style="color:#fff;margin-top:0;">Order summary</h3>
+        <div style="display:flex;justify-content:space-between;color:#fff;margin-bottom:0.5rem;">
+          <span>Subtotal</span><span>${{ '%.2f'|format(subtotal) }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;color:#fff;margin-bottom:1rem;">
+          <span>Tax (est.)</span><span>${{ '%.2f'|format(subtotal * 0.08) }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;color:#fff;font-size:1.5rem;font-family:var(--serif);margin-bottom:1.5rem;">
+          <span>Total</span><span>${{ '%.2f'|format(subtotal * 1.08) }}</span>
+        </div>
+        <form method="post" action="/booking/continue">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input class="form-input" type="date" name="date" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <select class="form-select" name="time" required>
+              <option value="">Choose slot…</option>
+              {% for h in range(9, 24) %}
+              <option value="{{ '%02d:00'|format(h) }}">{{ h }}:00</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preferred barber (optional)</label>
+            <select class="form-select" name="stylist_id">
+              <option value="">Any available</option>
+              {% for b in stylists %}
+              <option value="{{ b.id }}">{{ b.name }} — {{ b.role }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-dark btn-block">Proceed to checkout</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
